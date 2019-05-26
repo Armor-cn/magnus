@@ -1,5 +1,5 @@
-import { createConnection, Connection, ConnectionOptions } from 'typeorm';
-import { ApolloServer } from 'apollo-server';
+import { createConnection, Connection, ConnectionOptions, ObjectType } from 'typeorm';
+import { ApolloServer, gql } from 'apollo-server';
 import { DocumentNode } from 'graphql';
 import { IResolvers } from 'graphql-tools';
 export abstract class CoreServer {
@@ -9,10 +9,10 @@ export abstract class CoreServer {
         protected _server?: ApolloServer
     ) { }
 
-    async init() {
+    async init(def: string) {
         this._connection = await createConnection(this._options);
         this._server = new ApolloServer({
-            typeDefs: this.createTypeDefs(),
+            typeDefs: this.createTypeDefs(def),
             resolvers: this.createResolvers(),
             playground: true
         });
@@ -22,6 +22,72 @@ export abstract class CoreServer {
             return this._server.listen(port)
         }
     }
-    abstract createResolvers(): IResolvers;
-    abstract createTypeDefs(): DocumentNode | Array<DocumentNode>;
+
+    createMutation() {
+        let options = {};
+        if (this._options.entities) {
+            this._options.entities.map(type => {
+                if (typeof type === 'string') {
+                    // path
+                } else if (typeof type === 'function') {
+                    options = {
+                        ...options,
+                        ...this.createMutationByEntity(type)
+                    }
+                } else {
+                    // schema
+                }
+            })
+        }
+        return options;
+    }
+    createQuery() {
+        let options = {};
+        if (this._options.entities) {
+            this._options.entities.map(type => {
+                if (typeof type === 'string') {
+                    // path
+                } else if (typeof type === 'function') {
+                    options = {
+                        ...options,
+                        ...this.createQueryByEntity(type)
+                    }
+                } else {
+                    // schema
+                }
+            })
+        }
+        return options;
+    }
+    createSubscription() {
+        let options = {};
+        if (this._options.entities) {
+            this._options.entities.map(type => {
+                if (typeof type === 'string') {
+                    // path
+                } else if (typeof type === 'function') {
+                    options = {
+                        ...options,
+                        ...this.createSubscriptionByEntity(type)
+                    }
+                } else {
+                    // schema
+                }
+            })
+        }
+        return options;
+    }
+    abstract createMutationByEntity(entity: ObjectType<any>): object | undefined;
+    abstract createQueryByEntity(entity: ObjectType<any>): object | undefined;
+    abstract createSubscriptionByEntity(entity: ObjectType<any>): object | undefined;
+    createResolvers(): IResolvers {
+        return {
+            Query: this.createQuery(),
+            Mutation: this.createMutation(),
+            Subscription: this.createSubscription()
+        }
+    }
+    createTypeDefs(graphql: string): DocumentNode | Array<DocumentNode> {
+        return gql`${graphql}`;
+    }
 }
