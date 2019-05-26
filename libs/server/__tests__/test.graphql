@@ -1,8 +1,15 @@
-type Book {
-    title: String
-    author: String
+type BookQuery {
+    id: String!
+}
+
+type BookMutation {
+    id: String!
 }
 
 type Query {
-    books: [Book]
+    book: BookQuery!
+}
+
+type Mutation {
+    book: BookMutation!
 }

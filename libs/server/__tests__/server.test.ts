@@ -17,7 +17,7 @@ async function bootstrap() {
     const listen = server.listen(9000);
     if (listen) listen.then(({ url }) => {
         console.log(`app start ${url}`)
-    })
+    });
 }
 
 bootstrap();
