@@ -31,7 +31,7 @@ export class MagnusServer extends CoreServer {
                         repository.findOneOrFail(options);
                     }
                 },
-                query: <Entity>(query: string, parameters?: any[]) => repository.query(query, parameters),
+                query: (query: string, parameters?: any[]) => repository.query(query, parameters),
 
 
 
