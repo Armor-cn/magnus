@@ -1,5 +1,7 @@
 import { CoreGraphql } from '../lib/core/graphql'
 import { UserEntity } from './entities/user.entity'
+import { writeFileSync } from 'fs-extra'
+import { join } from 'path'
 export async function bootstrap() {
     const graphql = new CoreGraphql({
         type: 'postgres',
@@ -17,6 +19,6 @@ export async function bootstrap() {
 }
 
 bootstrap().then(res => {
-    console.log(res)
+    writeFileSync(join(__dirname, 'test.graphql'), res);
     debugger;
-})
+});

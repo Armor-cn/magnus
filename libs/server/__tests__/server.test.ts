@@ -1,7 +1,7 @@
 import { MagnusServer } from '../lib/index'
 import { readFileSync } from 'fs-extra'
 import { join } from 'path'
-import { readFile } from 'fs';
+
 async function bootstrap() {
     const server = new MagnusServer({
         type: 'postgres',
@@ -19,5 +19,4 @@ async function bootstrap() {
         console.log(`app start ${url}`)
     });
 }
-
 bootstrap();

@@ -1,15 +1,8 @@
-type BookQuery {
-    id: String!
+type UserEntity {
+	id: String!
+	title: String!
 }
-
-type BookMutation {
-    id: String!
+type Query{
 }
-
-type Query {
-    book: BookQuery!
-}
-
-type Mutation {
-    book: BookMutation!
+type Mutation{
 }

@@ -1,43 +1,78 @@
-import { ObjectType, ConnectionOptions, Connection, EntityMetadata } from "typeorm";
+import { ConnectionOptions, Connection, EntityMetadata, Code } from "typeorm";
 import { createConnection } from 'typeorm';
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 export class CoreGraphql {
+    static code: string = ``;
 
     constructor(
         protected _options: ConnectionOptions,
         protected _connection?: Connection
     ) { }
 
+
     createGraphql() {
-        let code = ``;
+        let code = CoreGraphql.code;
         if (this._connection) {
+            // type
             const metadatas: EntityMetadata[] = this._connection.entityMetadatas;
             metadatas.map(meta => {
-                code += this.createGraphqlByEntity(meta)
-            })
+                code += this.createTypeByEntity(meta)
+            });
+
+            // query
+            code += `type Query{\n`;
+            metadatas.map(meta => {
+                code += this.createQueryByEntity(meta)
+            });
+            code += `}\n`;
+
+            // mutation
+            code += `type Mutation{\n`;
+            metadatas.map(meta => {
+                code += this.createMutationByEntity(meta)
+            });
+            code += `}\n`;
         }
         return code;
     }
+
     async init() {
         this._connection = await createConnection(this._options);
     }
-    createGraphqlByEntity(entity: EntityMetadata): string {
+
+    createSystemType() {
+        let code = ``;
+        return code;
+    }
+
+    createTypeByEntity(entity: EntityMetadata): string {
         let code = ``;
         if (this._connection) {
-            code += `type ${entity.name} {\t`
+            code += `type ${entity.name} {\n`
             entity.columns.map((column: ColumnMetadata) => {
-                code += `${column.databaseName}: `;
-                const type = column.type.toString();
+                code += `\t${column.databaseName}: `;
+                const type = (column.type as any).name;
                 if (type === 'String') {
                     code += `String`;
+                } else {
+                    code += type;
                 }
-
-                if (column.isNullable) { 
+                if (!column.isNullable) {
                     code += `!\n`
                 }
             });
-            code += `}`
+            code += `}\n`;
         }
+        return code;
+    }
+
+    createQueryByEntity(meta: EntityMetadata) {
+        let code = ``
+        return code;
+    }
+
+    createMutationByEntity(meta: EntityMetadata) {
+        let code = ``
         return code;
     }
 }
