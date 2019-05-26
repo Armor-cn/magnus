@@ -1,0 +1,11 @@
+{ 
+  "automerge": true,
+  "rangeStrategy": "bump",
+  "semanticCommits":true,
+  "unpublishSafe":true,
+  "prCreation":"not-pending",
+  "masterIssue":true,
+  "extends": [
+    "config:base"
+  ]
+}
