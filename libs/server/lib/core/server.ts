@@ -1,6 +1,8 @@
 import { createConnection, Connection, ConnectionOptions, ObjectType } from 'typeorm';
 import { ApolloServer, gql } from 'apollo-server';
-import { DocumentNode } from 'graphql';
+import { DocumentNode, GraphQLScalarType } from 'graphql';
+import { Kind } from 'graphql/language';
+
 import { IResolvers } from 'graphql-tools';
 export abstract class CoreServer {
 
@@ -87,30 +89,48 @@ export abstract class CoreServer {
         return {
             Query: this.createQuery(),
             Mutation: this.createMutation(),
-            Json: {
+            // Json: new GraphQLScalarType({
+            //     name: 'Json',
+            //     parseValue(value: string) {
+            //         return JSON.parse(value);
+            //     },
+            //     parseLiteral(value: string){
+            //         return JSON.parse(value);
+            //     },
+            //     serialize(value: any) {
+            //         return JSON.stringify(value)
+            //     }
+            // }),
+            KeyString: new GraphQLScalarType({
+                name: 'KeyString',
                 parseValue(value: string) {
                     return JSON.parse(value);
                 },
                 serialize(value: any) {
                     return JSON.stringify(value)
-                }
-            },
-            KeyValue: {
-                parseValue(value: string) {
-                    return JSON.parse(value);
                 },
-                serialize(value: any) {
-                    return JSON.stringify(value)
+                parseLiteral(ast) {
+                    if (ast.kind === Kind.STRING) {
+                        return JSON.parse(ast.value);
+                    }
+                    return null;
                 }
-            },
-            Date: {
+            }),
+            Date: new GraphQLScalarType({
+                name: 'Date',
                 parseValue(value: string) {
                     return new Date(value);
                 },
                 serialize(value: Date) {
                     return value.getTime()
+                },
+                parseLiteral(ast) {
+                    if (ast.kind === Kind.STRING) {
+                        return new Date(ast.value);
+                    }
+                    return null;
                 }
-            }
+            })
         }
     }
     createTypeDefs(graphql: string): DocumentNode | Array<DocumentNode> {
