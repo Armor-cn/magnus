@@ -29,18 +29,12 @@ export abstract class CoreServer {
     }
 
     createMutation() {
-        let options = {};
-        if (this._options.entities) {
-            this._options.entities.map(type => {
-                if (typeof type === 'string') {
-                    // path
-                } else if (typeof type === 'function') {
-                    options = {
-                        ...options,
-                        ...this.createMutationByEntity(type)
-                    }
-                } else {
-                    // schema
+        const options: any = {};
+        if (this._connection) {
+            const metadatas = this._connection.entityMetadatas;
+            metadatas.map(meta => {
+                if (typeof meta.target === 'function') {
+                    options[`${meta.name}`] = this.createMutationByEntity(meta.target)
                 }
             })
         }
@@ -59,18 +53,12 @@ export abstract class CoreServer {
         return options;
     }
     createSubscription() {
-        let options = {};
-        if (this._options.entities) {
-            this._options.entities.map(type => {
-                if (typeof type === 'string') {
-                    // path
-                } else if (typeof type === 'function') {
-                    options = {
-                        ...options,
-                        ...this.createSubscriptionByEntity(type)
-                    }
-                } else {
-                    // schema
+        const options: any = {};
+        if (this._connection) {
+            const metadatas = this._connection.entityMetadatas;
+            metadatas.map(meta => {
+                if (typeof meta.target === 'function') {
+                    options[`${meta.name}`] = this.createSubscriptionByEntity(meta.target)
                 }
             })
         }

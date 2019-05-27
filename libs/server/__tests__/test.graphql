@@ -43,8 +43,16 @@ type UserSubscriptionPayload{
 	updatedFields: [String!]
 	previousValues: User
 }
-
-
+type UserQuery {
+	find(where:UserFindConditions): [User]!
+	findAndCount(where:UserFindConditions): UserFindAndCountResult!
+	count(where:UserFindConditions): Int!
+	findByIds(where:UserFindConditions): Int!
+}
+type UserMutation{
+	save(entities:[User]!,options:SaveOptions): [User]!
+	remove(entities:User!,options:RemoveOptions): User!
+}
 type UserSubscription{
 	watch(where:UserSubscriptionWhere!): UserSubscriptionPayload!
 }
@@ -57,7 +65,7 @@ input SaveOptions {
     reload: Boolean
 }
 
-type RemoveOptions {
+input RemoveOptions {
     data: Json
     listeners: Boolean
     transaction: Boolean
@@ -118,3 +126,15 @@ input UserSubscriptionWhere{
 	NOT: UserSubscriptionWhere
 }
 
+type Mutation {
+	User: UserMutation!
+
+}
+type Query {
+	User: UserQuery!
+
+}
+type Subscription {
+	User: UserSubscription!
+
+}

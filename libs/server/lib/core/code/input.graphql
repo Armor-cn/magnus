@@ -6,7 +6,7 @@ input SaveOptions {
     reload: Boolean
 }
 
-type RemoveOptions {
+input RemoveOptions {
     data: Json
     listeners: Boolean
     transaction: Boolean

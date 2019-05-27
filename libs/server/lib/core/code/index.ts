@@ -246,7 +246,7 @@ export class Code {
         return `${this.meta.name}Subscription`
     }
     createSubscription() {
-        let code = `input ${this.meta.name}Subscription{\n`
+        let code = `type ${this.meta.name}Subscription{\n`
         this.subscription.forEach(query => {
             query.propertites.map(property => {
                 const { name, params, result } = property;
