@@ -65,6 +65,9 @@ export class Code {
         const propertities: Property[] = [];
         propertities.push(new Property('skip', 'Int', false));
         propertities.push(new Property('take', 'Int', false));
+        propertities.push(new Property('relations', `[String!]`, false));
+        propertities.push(new Property('join', `JoinOptions`, false));
+        propertities.push(new Property('where', `${this.meta.discriminatorValue}FindConditions`, false));
         this.addType(new CodeType(`${this.meta.discriminatorValue}FindManyOptions`, propertities));
     }
 

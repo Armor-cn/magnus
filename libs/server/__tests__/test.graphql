@@ -31,6 +31,9 @@ type UserFindAndCountResult{
 type UserFindManyOptions{
 	skip: Int
 	take: Int
+	relations: [String!]
+	join: JoinOptions
+	where: UserFindConditions
 }
 type UserFindOneOptions{
 	relations: [String]
@@ -126,10 +129,13 @@ input UserSubscriptionWhere{
 
 type Mutation {
 	User: UserMutation
+
 }
 type Query {
 	User: UserQuery
+
 }
 type Subscription {
 	User: UserSubscription
+
 }
