@@ -1,3 +1,4 @@
 scalar Long
 scalar Date
-scalar KeyValue
+scalar KeyString
+scalar Json

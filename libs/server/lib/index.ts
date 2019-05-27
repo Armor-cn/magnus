@@ -37,15 +37,6 @@ export class MagnusServer extends CoreServer {
         if (this._connection) {
             const repository = this._connection.getRepository(entity);
             return {
-                create: <Entity>(entityLike?: DeepPartial<Entity>) => {
-                    if (entityLike) {
-                        repository.create(entityLike);
-                    } else {
-                        repository.create();
-                    }
-                },
-                merge: <Entity>(mergeIntoEntity: Entity, ...entityLikes: DeepPartial<Entity>[]) => repository.merge(mergeIntoEntity, ...entityLikes),
-                preload: <Entity>(entityLike: DeepPartial<Entity>) => repository.preload(entityLike),
                 save: <T>(entities: T[], options: SaveOptions & {
                     reload: false;
                 }) => repository.save(entities, options),
@@ -54,9 +45,6 @@ export class MagnusServer extends CoreServer {
                 update: <Entity>(criteria: string | string[] | number | number[] | Date | Date[] | ObjectID | ObjectID[] | FindConditions<Entity>,
                     partialEntity: QueryDeepPartialEntity<Entity>) => repository.update(criteria, partialEntity),
                 delete: <Entity>(criteria: string | string[] | number | number[] | Date | Date[] | ObjectID | ObjectID[] | FindConditions<Entity>) => repository.delete(criteria),
-                clear: () => repository.clear(),
-                increment: <Entity>(conditions: FindConditions<Entity>, propertyPath: string, value: number | string) => repository.increment(conditions, propertyPath, value),
-                decrement: <Entity>(conditions: FindConditions<Entity>, propertyPath: string, value: number | string) => repository.decrement(conditions, propertyPath, value),
             }
         }
     }

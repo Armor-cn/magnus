@@ -1,0 +1,14 @@
+input SaveOptions {
+    data: Json
+    listeners: Boolean
+    transaction: Boolean
+    chunk: Int
+    reload: Boolean
+}
+
+type RemoveOptions {
+    data: Json
+    listeners: Boolean
+    transaction: Boolean
+    chunk: Int
+}

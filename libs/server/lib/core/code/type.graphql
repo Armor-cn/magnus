@@ -1,7 +1,12 @@
 type JoinOptions {
     alias: String!
-    leftJoinAndSelect: KeyValue
-    innerJoinAndSelect: KeyValue
-    leftJoin: KeyValue
-    innerJoin: KeyValue;
+    leftJoinAndSelect: KeyString
+    innerJoinAndSelect: KeyString
+    leftJoin: KeyString
+    innerJoin: KeyString;
+}
+enum MutationType {
+  CREATED
+  UPDATED
+  DELETED
 }
