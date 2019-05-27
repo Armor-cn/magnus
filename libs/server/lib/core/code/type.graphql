@@ -1,0 +1,7 @@
+type JoinOptions {
+    alias: String!
+    leftJoinAndSelect: KeyValue
+    innerJoinAndSelect: KeyValue
+    leftJoin: KeyValue
+    innerJoin: KeyValue;
+}

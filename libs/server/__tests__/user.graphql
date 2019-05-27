@@ -1,0 +1,24 @@
+scalar Long
+
+
+type Query {
+
+}
+
+input UserCreateInput {
+    
+}
+
+input UserCreateResult {
+
+}
+
+type Mutation {
+    user: {
+        create(user: UserCreateInput!): UserCreateResult!;
+    }
+}
+
+type Subscription {
+
+}

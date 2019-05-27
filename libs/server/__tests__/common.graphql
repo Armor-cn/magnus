@@ -1,0 +1,4 @@
+type UserFindConditions<T> {
+    key: String
+    title: String
+}

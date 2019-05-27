@@ -1,13 +1,12 @@
-import { DeepPartial, FindConditions, FindManyOptions, FindOneOptions, ObjectID, ObjectType } from 'typeorm';
+import { DeepPartial, FindConditions, FindManyOptions, FindOneOptions, ObjectID, ObjectType, SaveOptions, RemoveOptions } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { CoreServer } from './core/server';
 export class MagnusServer extends CoreServer {
     createQueryByEntity(entity: ObjectType<any>) {
         if (this._connection) {
             const repository = this._connection.getRepository(entity);
+            const metadata = this._connection.getMetadata(entity);
             return {
-                hasId: <Entity>(entity: Entity) => repository.hasId(entity),
-                getId: <Entity>(entity: Entity) => repository.getId(entity),
                 find: <Entity>(tions?: FindManyOptions<Entity> | FindConditions<Entity>) => repository.find(tions),
                 findAndCount: <Entity>(tions?: FindManyOptions<Entity> | FindConditions<Entity>) => repository.findAndCount(tions),
                 count: <Entity>(tions?: FindManyOptions<Entity> | FindConditions<Entity>) => repository.count(tions),
@@ -20,7 +19,6 @@ export class MagnusServer extends CoreServer {
                     } else {
                         repository.findOne(options);
                     }
-
                 },
                 findOneOrFail: <Entity>(id?: string | number | Date | ObjectID, options?: FindOneOptions<Entity>, conditions?: FindConditions<Entity>) => {
                     if (id) {
@@ -31,12 +29,7 @@ export class MagnusServer extends CoreServer {
                         repository.findOneOrFail(options);
                     }
                 },
-                query: <Entity>(query: string, parameters?: any[]) => repository.query(query, parameters),
-
-
-
-
-
+                query: (query: string, parameters?: any[]) => repository.query(query, parameters),
             }
         }
     }
@@ -53,10 +46,10 @@ export class MagnusServer extends CoreServer {
                 },
                 merge: <Entity>(mergeIntoEntity: Entity, ...entityLikes: DeepPartial<Entity>[]) => repository.merge(mergeIntoEntity, ...entityLikes),
                 preload: <Entity>(entityLike: DeepPartial<Entity>) => repository.preload(entityLike),
-                save: <T, SaveOptions>(entities: T[], options: SaveOptions & {
+                save: <T>(entities: T[], options: SaveOptions & {
                     reload: false;
                 }) => repository.save(entities, options),
-                remove: <Entity, RemoveOptions>(entity: Entity[] | Entity, options?: RemoveOptions) => repository.remove(entity, options),
+                remove: <Entity>(entity: Entity[] | Entity, options?: RemoveOptions) => repository.remove(entity, options),
                 insert: <Entity>(entity: QueryDeepPartialEntity<Entity> | (QueryDeepPartialEntity<Entity>[])) => repository.insert(entity),
                 update: <Entity>(criteria: string | string[] | number | number[] | Date | Date[] | ObjectID | ObjectID[] | FindConditions<Entity>,
                     partialEntity: QueryDeepPartialEntity<Entity>) => repository.update(criteria, partialEntity),
@@ -64,7 +57,6 @@ export class MagnusServer extends CoreServer {
                 clear: () => repository.clear(),
                 increment: <Entity>(conditions: FindConditions<Entity>, propertyPath: string, value: number | string) => repository.increment(conditions, propertyPath, value),
                 decrement: <Entity>(conditions: FindConditions<Entity>, propertyPath: string, value: number | string) => repository.decrement(conditions, propertyPath, value),
-
             }
         }
     }

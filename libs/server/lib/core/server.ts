@@ -3,6 +3,7 @@ import { ApolloServer, gql } from 'apollo-server';
 import { DocumentNode } from 'graphql';
 import { IResolvers } from 'graphql-tools';
 export abstract class CoreServer {
+
     constructor(
         protected _options: ConnectionOptions,
         protected _connection?: Connection,
@@ -13,8 +14,10 @@ export abstract class CoreServer {
         this._connection = await createConnection(this._options);
         this._server = new ApolloServer({
             typeDefs: this.createTypeDefs(def),
-            resolvers: this.createResolvers(),
-            playground: true
+            resolvers: {
+                ...this.createResolvers()
+            },
+            playground: true,
         });
     }
     listen(port: number) {
@@ -84,7 +87,14 @@ export abstract class CoreServer {
         return {
             Query: this.createQuery(),
             Mutation: this.createMutation(),
-            Subscription: this.createSubscription()
+            KeyValue: {
+                parseValue(value: string) {
+                    return JSON.parse(value);
+                },
+                serialize(value: any) {
+                    return JSON.stringify(value)
+                }
+            }
         }
     }
     createTypeDefs(graphql: string): DocumentNode | Array<DocumentNode> {

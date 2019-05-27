@@ -1,8 +1,47 @@
-type UserEntity {
-	id: String!
+scalar Long
+scalar Date
+scalar KeyValue
+
+type JoinOptions {
+    alias: String!
+    leftJoinAndSelect: KeyValue
+    innerJoinAndSelect: KeyValue
+    leftJoin: KeyValue
+    innerJoin: KeyValue;
+}
+type User{
+	id: Int
+	key: String!
 	title: String!
 }
-type Query{
+type UserFindConditions{
+	id: Int
+	key: String
+	title: String
 }
-type Mutation{
+type UserFindAndCountResult{
+	list: [User]!
+	count: Int!
+}
+type UserFindManyOptions{
+	skip: Int
+	take: Int
+}
+type UserFindOneOptions{
+	relations: [String]
+}
+
+
+type Mutation {
+
+}
+type Query {
+	find(where:UserFindConditions): [User]!
+	findAndCount(where:UserFindConditions): UserFindAndCountResult!
+	count(where:UserFindConditions): Int!
+	findByIds(where:UserFindConditions): Int!
+
+}
+type Subscription {
+
 }

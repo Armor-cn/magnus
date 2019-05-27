@@ -1,17 +1,17 @@
 import { CoreGraphql } from '../lib/core/graphql'
-import { UserEntity } from './entities/user.entity'
+import { User } from './entities/user.entity'
 import { writeFileSync } from 'fs-extra'
 import { join } from 'path'
 export async function bootstrap() {
     const graphql = new CoreGraphql({
         type: 'postgres',
         host: 'localhost',
-        username: 'postgres',
-        password: 'postgres',
-        database: 'test_ci',
+        username: 'prisma',
+        password: 'prisma',
+        database: 'prisma',
         port: 5432,
         entities: [
-            UserEntity
+            User
         ]
     });
     await graphql.init();
