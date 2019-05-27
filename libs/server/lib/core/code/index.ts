@@ -451,14 +451,14 @@ export class CodeManager {
         this.type += `${readFileSync(join(__dirname, 'type.graphql')).toString('utf8')}`;
         this.metadatas.map(meta => {
             const code = new Code(meta);
-            this.query += `\t${meta.name}: ${code.getQuery()}\n`;
+            this.query += `\t${meta.name}: ${code.getQuery()}!\n`;
             this.type += code.createType();
             this.type += code.createQuery();
             this.type += code.createMutation();
             this.type += code.createSubscription();
             this.scalar += code.createScalar();
-            this.mutation += `\t${meta.name}: ${code.getMutation()}\n`;
-            this.subscription += `\t${meta.name}: ${code.getSubscription()}\n`;
+            this.mutation += `\t${meta.name}: ${code.getMutation()}!\n`;
+            this.subscription += `\t${meta.name}: ${code.getSubscription()}!\n`;
             this.input += code.createInput();
         });
     }

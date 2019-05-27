@@ -5,31 +5,13 @@ export class MagnusServer extends CoreServer {
     createQueryByEntity(entity: ObjectType<any>) {
         if (this._connection) {
             const repository = this._connection.getRepository(entity);
-            const metadata = this._connection.getMetadata(entity);
             return {
-                find: <Entity>(tions?: FindManyOptions<Entity> | FindConditions<Entity>) => repository.find(tions),
-                findAndCount: <Entity>(tions?: FindManyOptions<Entity> | FindConditions<Entity>) => repository.findAndCount(tions),
-                count: <Entity>(tions?: FindManyOptions<Entity> | FindConditions<Entity>) => repository.count(tions),
-                findByIds: <Entity>(ids: any[], tions?: FindManyOptions<Entity> | FindConditions<Entity>) => repository.findByIds(ids, tions),
-                findOne: <Entity>(id?: string | number | Date | ObjectID, options?: FindOneOptions<Entity>, conditions?: FindConditions<Entity>) => {
-                    if (id) {
-                        repository.findOne(id, options);
-                    } else if (conditions) {
-                        repository.findOne(conditions, options);
-                    } else {
-                        repository.findOne(options);
-                    }
-                },
-                findOneOrFail: <Entity>(id?: string | number | Date | ObjectID, options?: FindOneOptions<Entity>, conditions?: FindConditions<Entity>) => {
-                    if (id) {
-                        repository.findOneOrFail(id, options);
-                    } else if (conditions) {
-                        repository.findOneOrFail(conditions, options);
-                    } else {
-                        repository.findOneOrFail(options);
-                    }
-                },
-                query: (query: string, parameters?: any[]) => repository.query(query, parameters),
+                find: repository.find.bind(repository),
+                findAndCount: repository.findAndCount.bind(repository),
+                count: repository.count.bind(repository),
+                findByIds: repository.findByIds.bind(repository),
+                findOne: repository.findOne.bind(repository),
+                findOneOrFail: repository.findOneOrFail.bind(repository),
             }
         }
     }
@@ -37,20 +19,21 @@ export class MagnusServer extends CoreServer {
         if (this._connection) {
             const repository = this._connection.getRepository(entity);
             return {
-                save: <T>(entities: T[], options: SaveOptions & {
-                    reload: false;
-                }) => repository.save(entities, options),
-                remove: <Entity>(entity: Entity[] | Entity, options?: RemoveOptions) => repository.remove(entity, options),
-                insert: <Entity>(entity: QueryDeepPartialEntity<Entity> | (QueryDeepPartialEntity<Entity>[])) => repository.insert(entity),
-                update: <Entity>(criteria: string | string[] | number | number[] | Date | Date[] | ObjectID | ObjectID[] | FindConditions<Entity>,
-                    partialEntity: QueryDeepPartialEntity<Entity>) => repository.update(criteria, partialEntity),
-                delete: <Entity>(criteria: string | string[] | number | number[] | Date | Date[] | ObjectID | ObjectID[] | FindConditions<Entity>) => repository.delete(criteria),
+                save: repository.save.bind(repository),
+                remove: repository.remove.bind(repository),
+                insert: repository.insert.bind(repository),
+                update: repository.update.bind(repository),
+                delete: repository.delete.bind(repository),
             }
         }
     }
     createSubscriptionByEntity(entity: ObjectType<any>) {
         if (this._connection) {
-            return {}
+            return {
+                watch: (where: any) => {
+                    return {}
+                }
+            }
         }
     }
 }

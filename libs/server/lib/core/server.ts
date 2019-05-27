@@ -87,12 +87,28 @@ export abstract class CoreServer {
         return {
             Query: this.createQuery(),
             Mutation: this.createMutation(),
+            Json: {
+                parseValue(value: string) {
+                    return JSON.parse(value);
+                },
+                serialize(value: any) {
+                    return JSON.stringify(value)
+                }
+            },
             KeyValue: {
                 parseValue(value: string) {
                     return JSON.parse(value);
                 },
                 serialize(value: any) {
                     return JSON.stringify(value)
+                }
+            },
+            Date: {
+                parseValue(value: string) {
+                    return new Date(value);
+                },
+                serialize(value: Date) {
+                    return value.getTime()
                 }
             }
         }
