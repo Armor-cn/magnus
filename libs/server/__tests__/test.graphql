@@ -49,9 +49,9 @@ type UserQuery {
 	count(where:UserFindConditions): Int!
 	findByIds(where:UserFindConditions): Int!
 }
-input UserMutation{
-	save(entities:[User]! options:SaveOptions): [User]!
-	remove(entities:User! options:RemoveOptions): User!
+type UserMutation{
+	save(entities:[User]!,options:SaveOptions): [User]!
+	remove(entities:User!,options:RemoveOptions): User!
 }
 input UserSubscription{
 	watch(where:UserSubscriptionWhere!): UserSubscriptionPayload!

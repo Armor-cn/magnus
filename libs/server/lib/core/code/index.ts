@@ -213,7 +213,7 @@ export class Code {
         return `${this.meta.name}Mutation`
     }
     createMutation() {
-        let code = `input ${this.meta.name}Mutation{\n`
+        let code = `type ${this.meta.name}Mutation{\n`
         this.mutation.forEach(query => {
             query.propertites.map(property => {
                 const { name, params, result } = property;

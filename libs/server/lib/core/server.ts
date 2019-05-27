@@ -45,18 +45,12 @@ export abstract class CoreServer {
         return options;
     }
     createQuery() {
-        let options = {};
-        if (this._options.entities) {
-            this._options.entities.map(type => {
-                if (typeof type === 'string') {
-                    // path
-                } else if (typeof type === 'function') {
-                    options = {
-                        ...options,
-                        ...this.createQueryByEntity(type)
-                    }
-                } else {
-                    // schema
+        const options: any = {};
+        if (this._connection) {
+            const metadatas = this._connection.entityMetadatas;
+            metadatas.map(meta => {
+                if (typeof meta.target === 'function') {
+                    options[`${meta.name}`] = this.createQueryByEntity(meta.target)
                 }
             })
         }
