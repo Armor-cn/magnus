@@ -13,7 +13,7 @@ export class CoreServer {
         protected _server?: ApolloServer
     ) { }
 
-    async init() {
+    async init(): Promise<ApolloServer> {
         this._connection = await createConnection(this._options);
         const metadatas = this._connection.entityMetadatas;
         metadatas.map(meta => {
@@ -30,6 +30,7 @@ export class CoreServer {
             playground: true,
         };
         this._server = new ApolloServer(config);
+        return this._server;
     }
 
     listen(port: number) {
