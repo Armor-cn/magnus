@@ -109,15 +109,6 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                     )
                 ];
                 break;
-            case `${context.name}CountQuery`:
-                item.properties = [
-                    new ast.PropertyAst(
-                        `options`,
-                        new ast.UseAst(`${context.name}FindManyOptions`),
-                        false
-                    )
-                ];
-                break;
             case `${context.name}CountResult`:
                 item.properties = [
                     new ast.PropertyAst(
@@ -468,7 +459,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                     new ast.ParameterAst(
                         0,
                         `options`,
-                        new ast.TypeAst(`${context.name}CountQuery`).visit(this, context),
+                        new ast.TypeAst(`${context.name}FindManyOptions`).visit(this, context),
                         true
                     ).visit(this, context)
                 ];

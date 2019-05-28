@@ -1,11 +1,11 @@
 import { createConnection, Connection, ConnectionOptions, ObjectType } from 'typeorm';
-import { ApolloServer, gql } from 'apollo-server';
-import { DocumentNode, GraphQLScalarType } from 'graphql';
+import { ApolloServer } from 'apollo-server';
+import { GraphQLScalarType } from 'graphql';
 import { Kind } from 'graphql/language';
 import { compile } from './compiler/compile'
 import { IResolvers } from 'graphql-tools';
 import { Resolver } from './compiler/resolver'
-export abstract class CoreServer {
+export class CoreServer {
     resolver: Resolver<any>[] = [];
     constructor(
         protected _options: ConnectionOptions,
@@ -14,7 +14,7 @@ export abstract class CoreServer {
     ) {
     }
 
-    async init(def: string) {
+    async init() {
         this._connection = await createConnection(this._options);
         const metadatas = this._connection.entityMetadatas;
         metadatas.map(meta => {
@@ -23,13 +23,14 @@ export abstract class CoreServer {
                 this.resolver.push(new Resolver(res, meta.name))
             }
         });
-        this._server = new ApolloServer({
+        const config = {
             typeDefs: compile(this._connection),
             resolvers: {
                 ...this.createResolvers()
             },
             playground: true,
-        });
+        };
+        this._server = new ApolloServer(config);
     }
 
     listen(port: number) {
@@ -41,21 +42,21 @@ export abstract class CoreServer {
     createMutation() {
         const options: any = {};
         this.resolver.map(res => {
-            options[`${res.name}`] = res.getMutation()
+            options[`${res.name}`] = () => res.getMutation()
         });
         return options;
     }
     createQuery() {
         const options: any = {};
         this.resolver.map(res => {
-            options[`${res.name}`] = res.getQuery()
+            options[`${res.name}`] = () => res.getQuery()
         });
         return options;
     }
     createSubscription() {
         const options: any = {};
         this.resolver.map(res => {
-            options[`${res.name}`] = res.getSubscribtion()
+            options[`${res.name}`] = () => res.getSubscribtion()
         });
         return options;
     }
@@ -94,8 +95,5 @@ export abstract class CoreServer {
                 }
             })
         }
-    }
-    createTypeDefs(graphql: string): DocumentNode | Array<DocumentNode> {
-        return gql`${graphql}`;
     }
 }

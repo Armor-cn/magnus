@@ -49,13 +49,6 @@ input UserFindConditions {
 	title:String
 	item:String
 }
-input UserCountQuery {
-	options:UserFindManyOptions
-}
-input UserFindQuery {
-	where:UserFindConditions!
-	entity:User!
-}
 input JoinOptions {
 	alias:String!
 	leftJoinAndSelect:ObjectLiteral
@@ -76,6 +69,10 @@ input UserFindManyOptions {
 	relations:[String!]
 	join:JoinOptions
 	order:UserOrder
+}
+input UserFindQuery {
+	where:UserFindConditions!
+	entity:User!
 }
 input UserFindByIdsQuery {
 	ids:[String!]!
@@ -137,7 +134,7 @@ type UserFindOneResult {
 	data:UserOutput!
 }
 type UserQuery {
-	count(options: UserCountQuery!): UserCountResult!
+	count(options: UserFindManyOptions!): UserCountResult!
 	find(options: UserFindQuery!): UserFindResult!
 	findAndCount(options: UserFindManyOptions!): UserFindAndCountResult!
 	findByIds(options: UserFindByIdsQuery!): UserFindByIdsResult!
