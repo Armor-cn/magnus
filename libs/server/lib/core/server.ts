@@ -11,8 +11,7 @@ export class CoreServer {
         protected _options: ConnectionOptions,
         protected _connection?: Connection,
         protected _server?: ApolloServer
-    ) {
-    }
+    ) { }
 
     async init() {
         this._connection = await createConnection(this._options);
