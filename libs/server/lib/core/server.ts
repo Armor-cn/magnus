@@ -2,7 +2,7 @@ import { createConnection, Connection, ConnectionOptions, ObjectType } from 'typ
 import { ApolloServer, gql } from 'apollo-server';
 import { DocumentNode, GraphQLScalarType } from 'graphql';
 import { Kind } from 'graphql/language';
-
+import { compile } from './compiler/compile'
 import { IResolvers } from 'graphql-tools';
 export abstract class CoreServer {
 
@@ -15,13 +15,14 @@ export abstract class CoreServer {
     async init(def: string) {
         this._connection = await createConnection(this._options);
         this._server = new ApolloServer({
-            typeDefs: this.createTypeDefs(def),
+            typeDefs: compile(this._connection),
             resolvers: {
                 ...this.createResolvers()
             },
             playground: true,
         });
     }
+    
     listen(port: number) {
         if (this._server) {
             return this._server.listen(port)
@@ -71,18 +72,6 @@ export abstract class CoreServer {
         return {
             Query: this.createQuery(),
             Mutation: this.createMutation(),
-            // Json: new GraphQLScalarType({
-            //     name: 'Json',
-            //     parseValue(value: string) {
-            //         return JSON.parse(value);
-            //     },
-            //     parseLiteral(value: string){
-            //         return JSON.parse(value);
-            //     },
-            //     serialize(value: any) {
-            //         return JSON.stringify(value)
-            //     }
-            // }),
             KeyString: new GraphQLScalarType({
                 name: 'KeyString',
                 parseValue(value: string) {

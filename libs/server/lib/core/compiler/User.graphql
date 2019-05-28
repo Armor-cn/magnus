@@ -1,0 +1,154 @@
+
+scalar ObjectLiteral
+scalar Date
+enum MutationType {
+	CREATED
+	UPDATED
+	DELETED
+}
+
+enum OrderType {
+	ASC
+	DESC
+}
+
+input UserSaveInput {
+	data:User!
+	options:SaveOptions
+}
+input UserRemoveInput {
+	data:User!
+	options:RemoveOptions
+}
+input UserInput {
+	id:Int
+	key:String!
+	title:String!
+	item:String!
+}
+input UserFindConditions {
+	id:Int
+	key:String
+	title:String
+	item:String
+}
+input UserCountQuery {
+	options:UserFindManyOptions
+}
+input UserFindQuery {
+	where:UserFindConditions!
+	entity:User!
+}
+input UserFindManyOptions {
+	skip:Int
+	take:Int
+}
+input UserFindByIdsQuery {
+	ids:[String!]!
+	options:UserFindManyOptions
+}
+input UserFindOneQuery {
+	options:ObjectLiteral
+}
+input UserWatchInput {
+	mutation_in:MutationType
+	updatedFields_contains:String
+	updatedFields_contains_every:[String!]
+	updatedFields_contains_some:[String!]
+	node:UserSubscriptionInput
+	AND:UserSubscription
+	OR:UserSubscription
+	NOT:UserSubscription
+}
+
+type User {
+	id:Int
+	key:String!
+	title:String!
+	item:String!
+}
+type SaveOptions {
+	listeners:Boolean
+	transaction:Boolean
+	chunk:Int
+	reload:Boolean
+}
+type UserSaveResult {
+	data:User!
+}
+type RemoveOptions {
+	listeners:Boolean
+	transaction:Boolean
+	chunk:Int
+}
+type UserRemoveResult {
+	data:User!
+}
+type UserInsertResult {
+	identifiers:ObjectLiteral!
+	generatedMaps:ObjectLiteral!
+	raw:User!
+}
+type UserUpdateResult {
+	raw:User!
+	generatedMaps:ObjectLiteral!
+}
+type UserDeleteResult {
+	raw:User!
+	affected:Int
+}
+type UserMutation {
+	save(options: UserSaveInput!): UserSaveResult!
+	remove(options: UserRemoveInput!): UserRemoveResult!
+	insert(options: UserInput!): UserInsertResult!
+	update(where: UserFindConditions!, options: User!): UserUpdateResult!
+	delete(options: UserFindConditions!): UserDeleteResult!
+}
+type UserCountResult {
+	count:Int!
+}
+type UserFindConditions {
+	id:Int
+	key:String
+	title:String
+	item:String
+}
+type UserFindResult {
+	data:[User!]!
+}
+type UserFindAndCountResult {
+	count:Int!
+	data:[User!]!
+}
+type UserFindByIdsResult {
+	data:[User!]!
+}
+type UserFindOneResult {
+	data:User!
+}
+type UserQuery {
+	count(options: UserCountQuery!): UserCountResult!
+	find(options: UserFindQuery!): UserFindResult!
+	findAndCount(options: UserFindManyOptions!): UserFindAndCountResult!
+	findByIds(options: UserFindByIdsQuery!): UserFindByIdsResult!
+	findOne(options: UserFindOneQuery!): UserFindOneResult!
+}
+type UserWatchResult {
+	options:ObjectLiteral
+}
+type UserSubscription {
+	watch(options: UserWatchInput!): UserWatchResult!
+}
+
+type Query {
+	User:UserQuery!
+}
+
+type Mutation {
+	User:UserMutation!
+}
+
+type Subscription {
+	User:UserSubscription!
+}
+

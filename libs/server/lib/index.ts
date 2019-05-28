@@ -19,7 +19,12 @@ export class MagnusServer extends CoreServer {
         if (this._connection) {
             const repository = this._connection.getRepository(entity);
             return {
-                save: repository.save.bind(repository),
+                save: <T>(data: {
+                    entities: T[],
+                    options?: SaveOptions
+                }) => {
+                    repository.save(data.entities, data.options)
+                },
                 remove: repository.remove.bind(repository),
                 insert: repository.insert.bind(repository),
                 update: repository.update.bind(repository),

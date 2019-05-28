@@ -1,6 +1,10 @@
+"""日期"""
 scalar Date
+"""{[key:string]:string}"""
 scalar KeyString
+"""json"""
 scalar Json
+"""join"""
 type JoinOptions {
     alias: String!
     leftJoinAndSelect: KeyString
@@ -8,6 +12,7 @@ type JoinOptions {
     leftJoin: KeyString
     innerJoin: KeyString
 }
+"""mutation"""
 enum MutationType {
   CREATED
   UPDATED
@@ -17,11 +22,6 @@ type User{
 	id: Int
 	key: String!
 	title: String!
-}
-type UserFindConditions{
-	id: Int
-	key: String
-	title: String
 }
 type UserFindAndCountResult{
 	list: [User]!
@@ -50,13 +50,14 @@ type UserQuery {
 	findByIds(where:UserFindConditions): Int!
 }
 type UserMutation{
-	save(entities:[User]!,options:SaveOptions): [User]!
-	remove(entities:User!,options:RemoveOptions): User!
+	save(options:UserSaveInput!): UserSaveResultInput!
+	remove(entities:UserRemoveInput!,options:RemoveOptions): UserRemoveResultInput!
 }
 type UserSubscription{
 	watch(where:UserSubscriptionWhere!): UserSubscriptionPayload!
 }
 
+"""save"""
 input SaveOptions {
     data: Json
     listeners: Boolean
@@ -64,56 +65,17 @@ input SaveOptions {
     chunk: Int
     reload: Boolean
 }
-
+"""remove"""
 input RemoveOptions {
     data: Json
     listeners: Boolean
     transaction: Boolean
     chunk: Int
 }
-input UserWhereInput{
+input UserFindConditions{
 	id: Int
-	id_not: Int
-	id_in: [Int!]
-	id_not_in: [Int!]
-	id_lt: Int
-	id_lte: Int
-	id_gt: Int
-	id_gte: Int
-	id_contains: Int
-	id_not_contains: Int
-	id_starts_with: Int
-	id_not_starts_with: Int
-	id_ends_with: Int
-	id_not_ends_with: Int
 	key: String
-	key_not: String
-	key_in: [String!]
-	key_not_in: [String!]
-	key_lt: String
-	key_lte: String
-	key_gt: String
-	key_gte: String
-	key_contains: String
-	key_not_contains: String
-	key_starts_with: String
-	key_not_starts_with: String
-	key_ends_with: String
-	key_not_ends_with: String
 	title: String
-	title_not: String
-	title_in: [String!]
-	title_not_in: [String!]
-	title_lt: String
-	title_lte: String
-	title_gt: String
-	title_gte: String
-	title_contains: String
-	title_not_contains: String
-	title_starts_with: String
-	title_not_starts_with: String
-	title_ends_with: String
-	title_not_ends_with: String
 }
 input UserSubscriptionWhere{
 	mutation_in: MutationType
@@ -124,6 +86,23 @@ input UserSubscriptionWhere{
 	AND: UserSubscriptionWhere
 	OR: UserSubscriptionWhere
 	NOT: UserSubscriptionWhere
+}
+input UserSaveInput{
+	entities: User!
+	options: SaveOptions
+}
+input UserSaveResultInput{
+	code: Int
+	data: User!
+}
+input UserRemoveInput{
+	id: Int
+	key: String
+	title: String
+}
+input UserRemoveResultInput{
+	code: Int
+	message: String
 }
 
 type Mutation {

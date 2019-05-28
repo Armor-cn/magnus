@@ -13,4 +13,17 @@ export class User {
 
     @Column()
     title: string;
+
+    @Column({
+        type: 'varchar',
+        transformer: {
+            from: (str: string) => {
+                return JSON.parse(str)
+            },
+            to: (str: string[]) => {
+                return JSON.stringify(str)
+            }
+        }
+    })
+    item: string[];
 }
