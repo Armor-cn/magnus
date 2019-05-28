@@ -57,15 +57,6 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                     ).visit(this, context)
                 ];
                 break;
-            case `${context.name}RemoveResult`:
-                item.properties = [
-                    new ast.PropertyAst(
-                        `data`,
-                        new ast.TypeAst(context.name).visit(this, context),
-                        true
-                    ).visit(this, context)
-                ];
-                break;
             case `${context.name}InsertResult`:
                 item.properties = [
                     new ast.PropertyAst(
@@ -483,7 +474,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                 ];
                 break;
             case `remove`:
-                item.returnType = new ast.TypeAst(`${context.name}RemoveResult`).visit(this, context);
+                item.returnType = new ast.TypeAst(`${context.name}`).visit(this, context);
                 item.requiredReturn = true;
                 item.parameters = [
                     new ast.ParameterAst(
@@ -579,8 +570,8 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                 ];
                 break;
             case `findOne`:
-                item.returnType = new ast.TypeAst(`${context.name}FindOneResult`).visit(this, context);
-                item.requiredReturn = true;
+                item.returnType = new ast.TypeAst(`${context.name}`).visit(this, context);
+                item.requiredReturn = false;
                 item.parameters = [
                     new ast.ParameterAst(
                         0,

@@ -78,9 +78,6 @@ type UserOutput {
 	key:String!
 	title:String!
 }
-type UserRemoveResult {
-	data:UserOutput!
-}
 type UserInsertResult {
 	identifiers:ObjectLiteral!
 	generatedMaps:ObjectLiteral!
@@ -96,7 +93,7 @@ type UserDeleteResult {
 }
 type UserMutation {
 	save(entity: User!, options: SaveOptions): UserOutput!
-	remove(entity: User!, options: RemoveOptions): UserRemoveResult!
+	remove(entity: User!, options: RemoveOptions): UserOutput!
 	insert(options: UserInput!): UserInsertResult!
 	update(where: UserFindConditions!, options: User!): UserUpdateResult!
 	delete(options: UserFindConditions!): UserDeleteResult!
@@ -114,15 +111,12 @@ type UserFindAndCountResult {
 type UserFindByIdsResult {
 	data:[UserOutput!]!
 }
-type UserFindOneResult {
-	data:UserOutput!
-}
 type UserQuery {
 	count(options: UserFindManyOptions): UserCountResult!
 	find(options: UserFindQuery!): UserFindResult!
 	findAndCount(options: UserFindManyOptions!): UserFindAndCountResult!
 	findByIds(options: UserFindByIdsQuery!): UserFindByIdsResult!
-	findOne(options: UserFindOneQuery!): UserFindOneResult!
+	findOne(options: UserFindOneQuery!): UserOutput
 }
 type UserWatchResult {
 	data:UserOutput!

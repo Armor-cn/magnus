@@ -57,11 +57,11 @@ export class Resolver<T> {
     constructor(public repository: Repository<T>, public name: string) { }
     getQuery() {
         return {
-            count: this.count.bind(this),
-            find: this.find.bind(this),
-            findAndCount: this.findAndCount.bind(this),
-            findByIds: this.findByIds.bind(this),
-            findOne: this.findOne.bind(this)
+            count: (args: { options?: FindManyOptions<T> }) => this.count(args.options),
+            find: (args: { options?: FindConditions<T> }) => this.find(args.options),
+            findAndCount: (args: { conditions?: FindConditions<T> }) => this.findAndCount(args.conditions),
+            findByIds: (args: { options: FindByIdsType<T> }) => this.findByIds(args.options),
+            findOne: (args: { options: FindOneType<T> }) => this.findOne(args.options)
         }
     }
     getMutation() {
@@ -85,28 +85,28 @@ export class Resolver<T> {
     }
     getSubscribtion() {
         return {
-            watch: (watch: WatchInput) => {
-                return this.pubsub.asyncIterator(watch.mutation_in)
+            watch: (args: { watch: WatchInput }) => {
+                return this.pubsub.asyncIterator(args.watch.mutation_in)
             }
         }
     }
-    async save(entity: T, options?: SaveOptions): Promise<SignalResult<T>> {
+    async save(entity: T, options?: SaveOptions): Promise<T> {
         const data = await this.repository.save(entity, options);
         this.pubsub.publish(MutationType.UPDATED, {
             watch: { data, action: MutationType.UPDATED }
         });
-        return { data };
+        return data;
     }
     async saves(options: SavesInput<T>): Promise<MultiResult<T>> {
         const data = await this.repository.save(options.data, options.options);
         return { data };
     }
-    async remove(entity: T, options?: RemoveOptions): Promise<SignalResult<T>> {
+    async remove(entity: T, options?: RemoveOptions): Promise<T> {
         const data = await this.repository.remove(entity, options);
         this.pubsub.publish(MutationType.DELETED, {
             watch: { data, action: MutationType.DELETED }
         });
-        return { data }
+        return data;
     }
     async removes(options: RemovesInput<T>): Promise<MultiResult<T>> {
         const data = await this.repository.remove(options.data, options.options);
