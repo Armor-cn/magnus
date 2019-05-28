@@ -1,6 +1,6 @@
 {
   "name": "@notadd/magnus",
-  "version": "0.0.5",
+  "version": "0.0.1",
   "description": "> TODO: description",
   "author": "imeepos <1037483576@qq.com>",
   "homepage": "https://github.com/notadd/magnus/tree/master/libs/server#readme",
@@ -23,5 +23,5 @@
   "bugs": {
     "url": "https://github.com/notadd/magnus/issues"
   },
-  "gitHead": "10fb36937231d0432e6df294db91469427861b16"
+  "gitHead": "2144764cde37952d44fe61191eebfe6c2341dce9"
 }
