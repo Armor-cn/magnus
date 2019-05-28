@@ -16,17 +16,12 @@ input User {
 	id:Int
 	key:String!
 	title:String!
-	item:String!
 }
 input SaveOptions {
 	listeners:Boolean
 	transaction:Boolean
 	chunk:Int
 	reload:Boolean
-}
-input UserSaveInput {
-	data:User!
-	options:SaveOptions
 }
 input RemoveOptions {
 	listeners:Boolean
@@ -41,13 +36,11 @@ input UserInput {
 	id:Int
 	key:String!
 	title:String!
-	item:String!
 }
 input UserFindConditions {
 	id:Int
 	key:String
 	title:String
-	item:String
 }
 input JoinOptions {
 	alias:String!
@@ -60,7 +53,6 @@ input UserOrder {
 	id:OrderType
 	key:OrderType
 	title:OrderType
-	item:OrderType
 }
 input UserFindManyOptions {
 	skip:Int
@@ -89,7 +81,6 @@ type UserOutput {
 	id:Int
 	key:String!
 	title:String!
-	item:String!
 }
 type UserSaveResult {
 	data:UserOutput!
@@ -111,7 +102,7 @@ type UserDeleteResult {
 	affected:Int
 }
 type UserMutation {
-	save(options: UserSaveInput!): UserSaveResult!
+	save(entity: User!, options: SaveOptions): UserSaveResult!
 	remove(options: UserRemoveInput!): UserRemoveResult!
 	insert(options: UserInput!): UserInsertResult!
 	update(where: UserFindConditions!, options: User!): UserUpdateResult!
@@ -134,7 +125,7 @@ type UserFindOneResult {
 	data:UserOutput!
 }
 type UserQuery {
-	count(options: UserFindManyOptions!): UserCountResult!
+	count(options: UserFindManyOptions): UserCountResult!
 	find(options: UserFindQuery!): UserFindResult!
 	findAndCount(options: UserFindManyOptions!): UserFindAndCountResult!
 	findByIds(options: UserFindByIdsQuery!): UserFindByIdsResult!

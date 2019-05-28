@@ -460,7 +460,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                         0,
                         `options`,
                         new ast.TypeAst(`${context.name}FindManyOptions`).visit(this, context),
-                        true
+                        false
                     ).visit(this, context)
                 ];
                 break;
@@ -470,9 +470,15 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                 item.parameters = [
                     new ast.ParameterAst(
                         0,
-                        `options`,
-                        new ast.TypeAst(`${context.name}SaveInput`).visit(this, context),
+                        `entity`,
+                        new ast.TypeAst(`${context.name}`).visit(this, context),
                         true
+                    ).visit(this, context),
+                    new ast.ParameterAst(
+                        1,
+                        `options`,
+                        new ast.TypeAst(`SaveOptions`).visit(this, context),
+                        false
                     ).visit(this, context)
                 ];
                 break;

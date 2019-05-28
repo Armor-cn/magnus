@@ -34,7 +34,7 @@ export interface SignalResult<T> {
 }
 
 interface CountResultInput {
-    data: number;
+    count: number;
 }
 interface FindAndCountResultInput<T> {
     count: number;
@@ -80,8 +80,8 @@ export class Resolver<T> {
             }
         }
     }
-    async save(options: SaveInput<T>): Promise<SignalResult<T>> {
-        const data = await this.repository.save(options.data, options.options);
+    async save(entity: T, options: SaveOptions): Promise<SignalResult<T>> {
+        const data = await this.repository.save(entity, options);
         this.pubsub.publish(MutationType.UPDATED, {
             watch: { data, action: MutationType.UPDATED }
         });
@@ -128,8 +128,8 @@ export class Resolver<T> {
     }
     // query
     async count(options?: FindManyOptions<T>): Promise<CountResultInput> {
-        const data = await this.repository.count(options);
-        return { data }
+        const count = await this.repository.count(options);
+        return { count }
     }
     async findPage(options?: FindManyOptions<T>): Promise<MultiResult<T>> {
         const data = await this.repository.find(options);

@@ -1,6 +1,4 @@
 import { CoreServer } from '../lib/core/server'
-import { readFileSync } from 'fs-extra'
-import { join } from 'path'
 import { User } from './entities/user.entity'
 async function bootstrap() {
     const server = new CoreServer({
@@ -12,7 +10,8 @@ async function bootstrap() {
         port: 5432,
         entities: [
             User
-        ]
+        ],
+        synchronize: true
     });
     await server.init();
     const listen = server.listen(9000);
