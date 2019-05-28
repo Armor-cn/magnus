@@ -42,7 +42,9 @@ export class CoreServer {
     createMutation() {
         const options: any = {};
         this.resolver.map(res => {
-            options[`${res.name}`] = () => res.getMutation()
+            options[`${res.name}`] = (...args: any[]) => {
+                return res.getMutation()
+            }
         });
         return options;
     }

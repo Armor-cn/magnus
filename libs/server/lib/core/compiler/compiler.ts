@@ -465,7 +465,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                 ];
                 break;
             case `save`:
-                item.returnType = new ast.TypeAst(`${context.name}SaveResult`).visit(this, context);
+                item.returnType = new ast.TypeAst(`${context.name}`).visit(this, context);
                 item.requiredReturn = true;
                 item.parameters = [
                     new ast.ParameterAst(

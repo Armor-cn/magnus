@@ -78,9 +78,6 @@ type UserOutput {
 	key:String!
 	title:String!
 }
-type UserSaveResult {
-	data:UserOutput!
-}
 type UserRemoveResult {
 	data:UserOutput!
 }
@@ -98,7 +95,7 @@ type UserDeleteResult {
 	affected:Int
 }
 type UserMutation {
-	save(entity: User!, options: SaveOptions): UserSaveResult!
+	save(entity: User!, options: SaveOptions): UserOutput!
 	remove(entity: User!, options: RemoveOptions): UserRemoveResult!
 	insert(options: UserInput!): UserInsertResult!
 	update(where: UserFindConditions!, options: User!): UserUpdateResult!

@@ -66,11 +66,21 @@ export class Resolver<T> {
     }
     getMutation() {
         return {
-            save: this.save.bind(this),
-            remove: this.remove.bind(this),
-            insert: this.insert.bind(this),
-            update: this.update.bind(this),
-            delete: this.delete.bind(this)
+            save: (args: { entity: T, option?: SaveOptions }) => {
+                return this.save(args.entity, args.option)
+            },
+            remove: (args: { entity: T, options?: RemoveOptions }) => {
+                return this.remove(args.entity, args.options)
+            },
+            insert: (args: { entity: T }) => {
+                return this.insert(args.entity)
+            },
+            update: (args: { where: FindConditions<T>, entity: any }) => {
+                return this.update(args.where, args.entity)
+            },
+            delete: (args: { where: FindConditions<T> }) => {
+                return this.delete(args.where)
+            }
         }
     }
     getSubscribtion() {
@@ -80,7 +90,7 @@ export class Resolver<T> {
             }
         }
     }
-    async save(entity: T, options: SaveOptions): Promise<SignalResult<T>> {
+    async save(entity: T, options?: SaveOptions): Promise<SignalResult<T>> {
         const data = await this.repository.save(entity, options);
         this.pubsub.publish(MutationType.UPDATED, {
             watch: { data, action: MutationType.UPDATED }
