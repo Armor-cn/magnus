@@ -4,16 +4,25 @@ import { DocumentNode, GraphQLScalarType } from 'graphql';
 import { Kind } from 'graphql/language';
 import { compile } from './compiler/compile'
 import { IResolvers } from 'graphql-tools';
+import { Resolver } from './compiler/resolver'
 export abstract class CoreServer {
-
+    resolver: Resolver<any>[] = [];
     constructor(
         protected _options: ConnectionOptions,
         protected _connection?: Connection,
         protected _server?: ApolloServer
-    ) { }
+    ) {
+    }
 
     async init(def: string) {
         this._connection = await createConnection(this._options);
+        const metadatas = this._connection.entityMetadatas;
+        metadatas.map(meta => {
+            if (this._connection) {
+                const res = this._connection.getRepository(meta.target)
+                this.resolver.push(new Resolver(res, meta.name))
+            }
+        });
         this._server = new ApolloServer({
             typeDefs: compile(this._connection),
             resolvers: {
@@ -22,7 +31,7 @@ export abstract class CoreServer {
             playground: true,
         });
     }
-    
+
     listen(port: number) {
         if (this._server) {
             return this._server.listen(port)
@@ -31,49 +40,31 @@ export abstract class CoreServer {
 
     createMutation() {
         const options: any = {};
-        if (this._connection) {
-            const metadatas = this._connection.entityMetadatas;
-            metadatas.map(meta => {
-                if (typeof meta.target === 'function') {
-                    options[`${meta.name}`] = this.createMutationByEntity(meta.target)
-                }
-            })
-        }
+        this.resolver.map(res => {
+            options[`${res.name}`] = res.getMutation()
+        });
         return options;
     }
     createQuery() {
         const options: any = {};
-        if (this._connection) {
-            const metadatas = this._connection.entityMetadatas;
-            metadatas.map(meta => {
-                if (typeof meta.target === 'function') {
-                    options[`${meta.name}`] = this.createQueryByEntity(meta.target)
-                }
-            })
-        }
+        this.resolver.map(res => {
+            options[`${res.name}`] = res.getQuery()
+        });
         return options;
     }
     createSubscription() {
         const options: any = {};
-        if (this._connection) {
-            const metadatas = this._connection.entityMetadatas;
-            metadatas.map(meta => {
-                if (typeof meta.target === 'function') {
-                    options[`${meta.name}`] = this.createSubscriptionByEntity(meta.target)
-                }
-            })
-        }
+        this.resolver.map(res => {
+            options[`${res.name}`] = res.getSubscribtion()
+        });
         return options;
     }
-    abstract createMutationByEntity(entity: ObjectType<any>): object | undefined;
-    abstract createQueryByEntity(entity: ObjectType<any>): object | undefined;
-    abstract createSubscriptionByEntity(entity: ObjectType<any>): object | undefined;
     createResolvers(): IResolvers {
         return {
             Query: this.createQuery(),
             Mutation: this.createMutation(),
-            KeyString: new GraphQLScalarType({
-                name: 'KeyString',
+            ObjectLiteral: new GraphQLScalarType({
+                name: 'ObjectLiteral',
                 parseValue(value: string) {
                     return JSON.parse(value);
                 },

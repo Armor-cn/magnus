@@ -2,41 +2,53 @@ import * as ast from './ast';
 export class ParseVisitor implements ast.AstVisitor {
     type: Map<string, ast.TypeAst> = new Map()
     input: Map<string, ast.TypeAst> = new Map()
-    visitMethodAst(ast: ast.MethodAst, context: string): string {
-        return `${ast.name}(${ast.parameters.map(par => par.visit(this, 'input')).join(', ')}): ${ast.returnType.visit(this, context)}${ast.requiredReturn ? `!` : ``}`
+    visitMethodAst(ast: ast.MethodAst, context: 'input' | 'output'): string {
+        return `${ast.name}(${ast.parameters.map(par => par.visit(this, 'input')).join(', ')}): ${ast.returnType.visit(this, 'output')}${ast.requiredReturn ? `!` : ``}`
     }
     visitParameterAst(ast: ast.ParameterAst, context: 'input' | 'type'): string {
-        const type = ast.ast.visit(this, context);
+        const type = ast.ast.visit(this, 'input');
         return `${ast.name}: ${type}${ast.required ? `!` : ``}`;
-    }
-    visitTypeAst(ast: ast.TypeAst, context: 'input' | 'type'): string {
-        switch (context) {
-            case 'type':
-                ast.properties.map(pro => pro.visit(this, context))
-                this.type.set(ast.name, ast)
-                break;
-            case 'input':
-                ast.properties.map(pro => pro.visit(this, context))
-                this.input.set(ast.name, ast)
-                break;
-            default:
-
-                break;
-        }
-        return ast.name;
-    }
-    visitQueryAst(ast: ast.QueryAst, context: any): any {
-        return `type Query {\n\t${ast.properties.map(method => method.visit(this, context)).join(`\n\t`)}\n}\n`
-    }
-    visitMutationAst(ast: ast.MutationAst, context: any): any {
-        return `type Mutation {\n\t${ast.properties.map(method => method.visit(this, context)).join(`\n\t`)}\n}\n`
-    }
-    visitSubscriptionAst(ast: ast.SubscriptionAst, context: any): any {
-        return `type Subscription {\n\t${ast.properties.map(method => method.visit(this, context)).join(`\n\t`)}\n}\n`
     }
     visitInputAst(ast: ast.InputAst, context: any): any {
         return `input ${ast.name} {\n\t${ast.properties.map(property => property.visit(this, context)).join(`\n\t`)}}\n`
     }
+    visitTypeAst(ast: ast.TypeAst, context: 'input' | 'output'): string {
+        switch (context) {
+            case 'input':
+                // 如果是Input,如果属性不是Input需要转换成input
+                ast.properties.map(pro => pro.visit(this, 'input'))
+                if (this.type.has(ast.name)) {
+                    // 如果type里有了
+                    const name = ast.name + `Input`;
+                    this.input.set(name, ast)
+                    return name;
+                } else {
+                    this.input.set(ast.name, ast)
+                    return ast.name;
+                }
+            default:
+                // output
+                ast.properties.map(pro => pro.visit(this, context))
+                if (this.input.has(ast.name)) {
+                    const name = ast.name + `Output`;
+                    this.type.set(name, ast)
+                    return name;
+                } else {
+                    this.type.set(ast.name, ast);
+                    return ast.name;
+                }
+        }
+    }
+    visitQueryAst(ast: ast.QueryAst, context: any): any {
+        return `type Query {\n\t${ast.properties.map(method => method.visit(this, 'output')).join(`\n\t`)}\n}\n`
+    }
+    visitMutationAst(ast: ast.MutationAst, context: any): any {
+        return `type Mutation {\n\t${ast.properties.map(method => method.visit(this, 'output')).join(`\n\t`)}\n}\n`
+    }
+    visitSubscriptionAst(ast: ast.SubscriptionAst, context: any): any {
+        return `type Subscription {\n\t${ast.properties.map(method => method.visit(this, 'output')).join(`\n\t`)}\n}\n`
+    }
+
     visitEnumAst(ast: ast.EnumAst, context: any): any {
         return `enum ${ast.name} {\n\t${ast.properties.join(`\n\t`)}\n}\n`
     }
@@ -61,11 +73,57 @@ export class ParseVisitor implements ast.AstVisitor {
     visitScalarAst(ast: ast.ScalarAst, context: any): any {
         return `scalar ${ast.name}`
     }
-    visitPropertyAst(ast: ast.PropertyAst, context: 'input' | 'type'): any {
-        return `${ast.name}:${ast.type.visit(this, `type`)}${ast.required ? `!` : ``}`;
+    visitPropertyAst(item: ast.PropertyAst, context: 'input' | 'output'): any {
+        if (item.type instanceof ast.UseAst) {
+            if (context === 'input') {
+                if (!this.input.has(item.type.name)) {
+                    if (this.type.has(item.type.name)) {
+                        const ast = this.type.get(item.type.name)
+                        if (ast) {
+                            this.input.set(ast.name + 'Input', ast)
+                            item.type.name = ast.name + 'Input';
+                        }
+                    }
+                }
+            } else {
+                if (!this.type.has(item.type.name)) {
+                    if (this.input.has(item.type.name)) {
+                        const ast = this.input.get(item.type.name)
+                        if (ast) {
+                            this.type.set(ast.name + 'Output', ast)
+                            item.type.name = ast.name + 'Output';
+                        }
+                    }
+                }
+            }
+        }
+        return `${item.name}:${item.type.visit(this, context)}${item.required ? `!` : ``}`;
     }
-    visitArrayAst(ast: ast.ArrayAst, context: any): any {
-        return `[${ast.type.visit(this, context)}${ast.required ? `!` : ``}]`
+    visitArrayAst(item: ast.ArrayAst, context: 'input' | 'output'): any {
+        if (item.type instanceof ast.UseAst) {
+            if (context === 'input') {
+                if (!this.input.has(item.type.name)) {
+                    if (this.type.has(item.type.name)) {
+                        const ast = this.type.get(item.type.name)
+                        if (ast) {
+                            this.input.set(ast.name + 'Input', ast)
+                            item.type.name = ast.name + 'Input';
+                        }
+                    }
+                }
+            } else {
+                if (!this.type.has(item.type.name)) {
+                    if (this.input.has(item.type.name)) {
+                        const ast = this.input.get(item.type.name)
+                        if (ast) {
+                            this.type.set(ast.name + 'Output', ast)
+                            item.type.name = ast.name + 'Output';
+                        }
+                    }
+                }
+            }
+        }
+        return `[${item.type.visit(this, context)}${item.required ? `!` : ``}]`
     }
     visitObjectLiteralAst(item: ast.ObjectLiteralAst, context: any) {
         return `ObjectLiteral`;
@@ -82,12 +140,12 @@ export class ParseVisitor implements ast.AstVisitor {
         let inputString = ``;
         this.input.forEach((input) => {
             inputString += `input ${input.name} `;
-            inputString += `{\n\t${input.properties.map(pro => pro.visit(this, `create`)).join(`\n\t`)}\n}\n`
+            inputString += `{\n\t${input.properties.map(pro => pro.visit(this, `input`)).join(`\n\t`)}\n}\n`
         });
         let typeString = ``;
-        this.type.forEach((input) => {
-            typeString += `type ${input.name} `;
-            typeString += `{\n\t${input.properties.map(pro => pro.visit(this, `create`)).join(`\n\t`)}\n}\n`
+        this.type.forEach((input, key) => {
+            typeString += `type ${key} `;
+            typeString += `{\n\t${input.properties.map(pro => pro.visit(this, `output`)).join(`\n\t`)}\n}\n`
         });
         return `
 ${scalars}

@@ -1,4 +1,4 @@
-import { Repository, EntityMetadata } from 'typeorm';
+import { EntityMetadata } from 'typeorm';
 import * as ast from './ast';
 
 export class Compiler<T> {
@@ -249,22 +249,20 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
             case `${context.name}WatchResult`:
                 item.properties = [
                     new ast.PropertyAst(
-                        `options`,
-                        new ast.ObjectLiteralAst(),
-                        false
-                    )
+                        `data`,
+                        new ast.UseAst(`${context.name}`),
+                        true
+                    ),
+                    new ast.PropertyAst(
+                        `action`,
+                        new ast.UseAst(`MutationType`),
+                        true
+                    ),
                 ];
                 break;
             case `${context.name}WatchInput`:
                 item.properties = [
                     new ast.PropertyAst(`mutation_in`, new ast.UseAst(`MutationType`), false),
-                    new ast.PropertyAst(`updatedFields_contains`, new ast.StringAst().visit(this, context), false),
-                    new ast.PropertyAst(`updatedFields_contains_every`, new ast.ArrayAst(new ast.StringAst(), true).visit(this, context), false),
-                    new ast.PropertyAst(`updatedFields_contains_some`, new ast.ArrayAst(new ast.StringAst(), true).visit(this, context), false),
-                    new ast.PropertyAst(`node`, new ast.UseAst(`${context.name}SubscriptionInput`).visit(this, context), false),
-                    new ast.PropertyAst(`AND`, new ast.UseAst(`${context.name}Subscription`).visit(this, context), false),
-                    new ast.PropertyAst(`OR`, new ast.UseAst(`${context.name}Subscription`).visit(this, context), false),
-                    new ast.PropertyAst(`NOT`, new ast.UseAst(`${context.name}Subscription`).visit(this, context), false),
                 ];
                 break;
             case `${context.name}`:
@@ -333,7 +331,23 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
             case `${context.name}FindManyOptions`:
                 item.properties = [
                     new ast.PropertyAst(`skip`, new ast.IntAst(), false),
-                    new ast.PropertyAst(`take`, new ast.IntAst(), false)
+                    new ast.PropertyAst(`take`, new ast.IntAst(), false),
+                    new ast.PropertyAst(`where`, new ast.UseAst(`${context.name}FindConditions`), false),
+                    new ast.PropertyAst(
+                        `relations`,
+                        new ast.ArrayAst(new ast.StringAst(), true),
+                        false
+                    ),
+                    new ast.PropertyAst(
+                        `join`,
+                        new ast.TypeAst(`JoinOptions`).visit(this, context),
+                        false
+                    ),
+                    new ast.PropertyAst(
+                        `order`,
+                        new ast.TypeAst(`${context.name}Order`).visit(this, context),
+                        false
+                    )
                 ];
                 item.father = new ast.TypeAst(`${context.name}FindOneOptions`).visit(this, context)
                 break;
@@ -347,7 +361,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                     ),
                     new ast.PropertyAst(
                         `join`,
-                        new ast.TypeAst(`JoinOptions`),
+                        new ast.TypeAst(`JoinOptions`).visit(this, context),
                         false
                     ),
                     new ast.PropertyAst(
@@ -410,6 +424,15 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                         )
                     })
                 ]
+                break;
+            case 'JoinOptions':
+                item.properties = [
+                    new ast.PropertyAst(`alias`, new ast.StringAst(), true),
+                    new ast.PropertyAst(`leftJoinAndSelect`, new ast.UseAst(`ObjectLiteral`), false),
+                    new ast.PropertyAst(`innerJoinAndSelect`, new ast.UseAst(`ObjectLiteral`), false),
+                    new ast.PropertyAst(`leftJoin`, new ast.UseAst(`ObjectLiteral`), false),
+                    new ast.PropertyAst(`innerJoin`, new ast.UseAst(`ObjectLiteral`), false),
+                ];
                 break;
             default:
                 debugger;

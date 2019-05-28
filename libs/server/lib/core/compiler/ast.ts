@@ -63,6 +63,12 @@ export class ParameterAst extends Ast {
 export class InputAst extends Ast {
     name: string;
     properties: PropertyAst[] = [];
+    father: AstType;
+    constructor(name: string, father?: AstType) {
+        super();
+        this.name = name;
+        if (father) this.father = father;
+    }
     visit(visitor: AstVisitor, context: any) {
         return visitor.visitInputAst(this, context);
     }
@@ -182,6 +188,8 @@ export class TypeAst extends Ast {
         return visitor.visitTypeAst(this, context);
     }
 }
+
+
 export interface AstVisitor<T = any> {
     visitUseAst(ast: UseAst, context: T): any;
     visitObjectLiteralAst(ast: ObjectLiteralAst, context: T): any;

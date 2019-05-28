@@ -1,4 +1,13 @@
 import { Repository, FindManyOptions, FindOneOptions, ObjectID, UpdateResult, DeleteResult, FindConditions, InsertResult, RemoveOptions, SaveOptions } from 'typeorm';
+export enum MutationType {
+    CREATED = 'CREATED',
+    UPDATED = 'UPDATED',
+    DELETED = 'DELETED'
+}
+export enum OrderType {
+    ASC = 'ASC',
+    DESC = 'DESC'
+}
 export interface SaveInput<T> {
     data: T;
     options?: SaveOptions;
@@ -39,10 +48,43 @@ interface FindOneType<T> {
     id?: string | number | Date | ObjectID;
     options?: FindOneOptions<T>
 }
+interface WatchInput {
+    mutation_in: MutationType[];
+}
+import { PubSub } from 'apollo-server'
 export class Resolver<T> {
-    constructor(public repository: Repository<T>) { }
+    pubsub: PubSub = new PubSub();
+    constructor(public repository: Repository<T>, public name: string) { }
+    getQuery() {
+        return {
+            count: this.count.bind(this),
+            find: this.find.bind(this),
+            findAndCount: this.findAndCount.bind(this),
+            findByIds: this.findByIds.bind(this),
+            findOne: this.findOne.bind(this)
+        }
+    }
+    getMutation() {
+        return {
+            save: this.save.bind(this),
+            remove: this.remove.bind(this),
+            insert: this.insert.bind(this),
+            update: this.update.bind(this),
+            delete: this.delete.bind(this)
+        }
+    }
+    getSubscribtion() {
+        return {
+            watch: (watch: WatchInput) => {
+                return this.pubsub.asyncIterator(watch.mutation_in)
+            }
+        }
+    }
     async save(options: SaveInput<T>): Promise<SignalResult<T>> {
         const data = await this.repository.save(options.data, options.options);
+        this.pubsub.publish(MutationType.UPDATED, {
+            watch: { data, action: MutationType.UPDATED }
+        });
         return { data };
     }
     async saves(options: SavesInput<T>): Promise<MultiResult<T>> {
@@ -51,6 +93,9 @@ export class Resolver<T> {
     }
     async remove(options: RemoveInput<T>): Promise<SignalResult<T>> {
         const data = await this.repository.remove(options.data, options.options);
+        this.pubsub.publish(MutationType.DELETED, {
+            watch: { data, action: MutationType.DELETED }
+        });
         return { data }
     }
     async removes(options: RemovesInput<T>): Promise<MultiResult<T>> {
@@ -58,16 +103,28 @@ export class Resolver<T> {
         return { data }
     }
     async insert(options: any): Promise<InsertResult> {
-        return this.repository.insert(options);
+        const data = await this.repository.insert(options);
+        this.pubsub.publish(MutationType.CREATED, {
+            watch: { data, action: MutationType.CREATED }
+        });
+        return data;
     }
     async inserts(options: any[]): Promise<InsertResult> {
         return this.repository.insert(options)
     }
     async update(where: FindConditions<T>, entity: any): Promise<UpdateResult> {
-        return this.repository.update(where, entity);
+        const data = await this.repository.update(where, entity);
+        this.pubsub.publish(MutationType.UPDATED, {
+            watch: { data, action: MutationType.UPDATED }
+        });
+        return data;
     }
     async delete(where: FindConditions<T>): Promise<DeleteResult> {
-        return this.repository.delete(where);
+        const data = await this.repository.delete(where);
+        this.pubsub.publish(MutationType.DELETED, {
+            watch: { data, action: MutationType.DELETED }
+        });
+        return data;
     }
     // query
     async count(options?: FindManyOptions<T>): Promise<CountResultInput> {
