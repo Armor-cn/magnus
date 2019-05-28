@@ -28,10 +28,6 @@ input RemoveOptions {
 	transaction:Boolean
 	chunk:Int
 }
-input UserRemoveInput {
-	data:User!
-	options:RemoveOptions
-}
 input UserInput {
 	id:Int
 	key:String!
@@ -103,7 +99,7 @@ type UserDeleteResult {
 }
 type UserMutation {
 	save(entity: User!, options: SaveOptions): UserSaveResult!
-	remove(options: UserRemoveInput!): UserRemoveResult!
+	remove(entity: User!, options: RemoveOptions): UserRemoveResult!
 	insert(options: UserInput!): UserInsertResult!
 	update(where: UserFindConditions!, options: User!): UserUpdateResult!
 	delete(options: UserFindConditions!): UserDeleteResult!

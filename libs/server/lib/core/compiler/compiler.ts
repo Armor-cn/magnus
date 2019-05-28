@@ -488,9 +488,15 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                 item.parameters = [
                     new ast.ParameterAst(
                         0,
-                        `options`,
-                        new ast.TypeAst(`${context.name}RemoveInput`).visit(this, context),
+                        `entity`,
+                        new ast.TypeAst(`${context.name}`).visit(this, context),
                         true
+                    ).visit(this, context),
+                    new ast.ParameterAst(
+                        0,
+                        `options`,
+                        new ast.TypeAst(`RemoveOptions`).visit(this, context),
+                        false
                     ).visit(this, context)
                 ];
                 break;

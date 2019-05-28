@@ -91,8 +91,8 @@ export class Resolver<T> {
         const data = await this.repository.save(options.data, options.options);
         return { data };
     }
-    async remove(options: RemoveInput<T>): Promise<SignalResult<T>> {
-        const data = await this.repository.remove(options.data, options.options);
+    async remove(entity: T, options?: RemoveOptions): Promise<SignalResult<T>> {
+        const data = await this.repository.remove(entity, options);
         this.pubsub.publish(MutationType.DELETED, {
             watch: { data, action: MutationType.DELETED }
         });
@@ -102,8 +102,8 @@ export class Resolver<T> {
         const data = await this.repository.remove(options.data, options.options);
         return { data }
     }
-    async insert(options: any): Promise<InsertResult> {
-        const data = await this.repository.insert(options);
+    async insert(entity: any): Promise<InsertResult> {
+        const data = await this.repository.insert(entity);
         this.pubsub.publish(MutationType.CREATED, {
             watch: { data, action: MutationType.CREATED }
         });
