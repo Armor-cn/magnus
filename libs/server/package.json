@@ -1,5 +1,5 @@
 {
-  "name": "@nger/magnus",
+  "name": "@notadd/magnus",
   "version": "0.0.3",
   "description": "> TODO: description",
   "author": "imeepos <1037483576@qq.com>",
@@ -23,5 +23,5 @@
   "bugs": {
     "url": "https://github.com/notadd/magnus/issues"
   },
-  "gitHead": "9139bd1938d0b2fe6186ec426802447d08967abc"
+  "gitHead": "92d0449b1a9fc28fe02525ffa57542591f2284a9"
 }
