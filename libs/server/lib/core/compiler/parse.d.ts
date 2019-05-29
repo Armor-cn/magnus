@@ -24,3 +24,5 @@ export declare class ParseVisitor implements ast.AstVisitor {
     visitDateAst(): string;
     visitDocumentAst(ast: ast.DocumentAst, context: ast.ProgressAst): any;
 }
+export declare class ParseOuterVisitor extends ParseVisitor {
+}

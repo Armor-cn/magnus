@@ -4,7 +4,8 @@
 	"description": "> dota2 半人猛犸， 干掉prisma",
 	"main": "index.js",
 	"scripts": {
-		"tsc": "./node_modules/.bin/tsc -p tsconfig.json -w"
+		"tsc": "./node_modules/.bin/tsc -p tsconfig.json -w",
+		"ts": "./node_modules/.bin/ts-node"
 	},
 	"repository": {
 		"type": "git",
@@ -20,6 +21,7 @@
 		"@nestjs/common": "^6.2.4",
 		"@nestjs/core": "^6.2.4",
 		"@nestjs/graphql": "^6.2.1",
+		"@nestjs/platform-express": "^6.2.4",
 		"apollo-server": "^2.5.0",
 		"apollo-server-express": "^2.5.0",
 		"fs-extra": "^8.0.1",

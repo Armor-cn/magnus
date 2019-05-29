@@ -17,10 +17,14 @@ class ParseVisitor {
         const scalars = item.scalars.map(scalar => scalar.visit(this, context)).join(`\n`);
         const enu = item.enums.map(enu => enu.visit(this, context)).join(`\n`);
         let mutation = ``, query = ``, subscription = ``;
+        const outer = new ParseOuterVisitor();
         item.docs.map(doc => {
             mutation += doc.mutation.visit(this, item);
+            mutation += doc.mutation.visit(outer, item);
             query += doc.query.visit(this, item);
+            query += doc.query.visit(outer, item);
             subscription += doc.subscription.visit(this, item);
+            subscription += doc.subscription.visit(outer, item);
         });
         let inputString = ``;
         item.input.forEach((input) => {
@@ -185,3 +189,6 @@ ${mutation}
     }
 }
 exports.ParseVisitor = ParseVisitor;
+class ParseOuterVisitor extends ParseVisitor {
+}
+exports.ParseOuterVisitor = ParseOuterVisitor;

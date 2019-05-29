@@ -1,5 +1,5 @@
 import { createConnection, Connection, ConnectionOptions, ObjectType } from 'typeorm';
-import { ApolloServer } from 'apollo-server';
+import { ApolloServer } from 'apollo-server-express';
 import { GraphQLScalarType } from 'graphql';
 import { Kind } from 'graphql/language';
 import { compile } from './compiler/compile'
@@ -31,12 +31,6 @@ export class CoreServer {
         };
         this._server = new ApolloServer(config);
         return this._server;
-    }
-
-    listen(port: number) {
-        if (this._server) {
-            return this._server.listen(port)
-        }
     }
 
     createMutation() {

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
-const apollo_server_1 = require("apollo-server");
+const apollo_server_express_1 = require("apollo-server-express");
 const graphql_1 = require("graphql");
 const language_1 = require("graphql/language");
 const compile_1 = require("./compiler/compile");
@@ -29,13 +29,8 @@ class CoreServer {
             },
             playground: true,
         };
-        this._server = new apollo_server_1.ApolloServer(config);
+        this._server = new apollo_server_express_1.ApolloServer(config);
         return this._server;
-    }
-    listen(port) {
-        if (this._server) {
-            return this._server.listen(port);
-        }
     }
     createMutation() {
         const options = {};

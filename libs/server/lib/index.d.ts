@@ -1,14 +1,16 @@
-import { HttpAdapterHost } from '@nestjs/common';
+import { OnModuleInit } from '@nestjs/common';
+import { HttpAdapterHost } from '@nestjs/core';
 import { ConnectionOptions } from 'typeorm';
 export declare const MAGNUS_TYPEORM_OPTIONS = "MAGNUS_TYPEORM_OPTIONS";
 export declare const MAGNUS_CONFIG = "MAGNUS_CONFIG";
+export { ConnectionOptions };
 export interface NagnusConfig {
     path?: string;
     cors?: boolean;
     bodyParserConfig?: boolean;
     installSubscriptionHandlers?: boolean;
 }
-export declare class MagnusServerModule {
+export declare class MagnusServerModule implements OnModuleInit {
     private readonly httpAdapterHost;
     private readonly options;
     private readonly config;
@@ -24,4 +26,5 @@ export declare class MagnusServerModule {
         })[];
     };
     onModuleInit(): Promise<void>;
+    create(httpAdapterHost: HttpAdapterHost, options: ConnectionOptions, config: NagnusConfig): Promise<void>;
 }

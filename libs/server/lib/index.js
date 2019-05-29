@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var MagnusServerModule_1;
 "use strict";
 const common_1 = require("@nestjs/common");
+const core_1 = require("@nestjs/core");
 const server_1 = require("./core/server");
 exports.MAGNUS_TYPEORM_OPTIONS = 'MAGNUS_TYPEORM_OPTIONS';
 exports.MAGNUS_CONFIG = 'MAGNUS_CONFIG';
@@ -34,31 +35,35 @@ let MagnusServerModule = MagnusServerModule_1 = class MagnusServerModule {
                 },
                 {
                     provide: exports.MAGNUS_CONFIG,
-                    useValue: config,
-                },
+                    useValue: config
+                }
             ]
         };
     }
     async onModuleInit() {
-        if (!this.httpAdapterHost) {
+        await this.create(this.httpAdapterHost, this.options, this.config);
+    }
+    async create(httpAdapterHost, options, config) {
+        if (!httpAdapterHost) {
             return;
         }
-        const httpAdapter = this.httpAdapterHost.httpAdapter;
+        const httpAdapter = httpAdapterHost.httpAdapter;
         if (!httpAdapter) {
             return;
         }
         const app = httpAdapter.getInstance();
-        const server = new server_1.CoreServer(this.options);
+        const server = new server_1.CoreServer(options);
         const apolloServer = await server.init();
         apolloServer.applyMiddleware({
             app,
-            path: this.config.path ? this.config.path : `/`,
-            cors: !!this.config.cors,
-            bodyParserConfig: this.config.bodyParserConfig
+            path: config.path ? config.path : `/`,
+            cors: !!config.cors,
+            bodyParserConfig: config.bodyParserConfig
         });
-        if (!!this.config.installSubscriptionHandlers) {
+        if (!!config.installSubscriptionHandlers) {
             apolloServer.installSubscriptionHandlers(httpAdapter.getHttpServer());
         }
+        return;
     }
 };
 MagnusServerModule = MagnusServerModule_1 = __decorate([
@@ -68,6 +73,6 @@ MagnusServerModule = MagnusServerModule_1 = __decorate([
     }),
     __param(1, common_1.Inject(exports.MAGNUS_TYPEORM_OPTIONS)),
     __param(2, common_1.Inject(exports.MAGNUS_CONFIG)),
-    __metadata("design:paramtypes", [Object, Object, Object])
+    __metadata("design:paramtypes", [core_1.HttpAdapterHost, Object, Object])
 ], MagnusServerModule);
 exports.MagnusServerModule = MagnusServerModule;
