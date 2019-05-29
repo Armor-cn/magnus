@@ -1,76 +1,67 @@
-import { DeepPartial, FindConditions, FindManyOptions, FindOneOptions, ObjectID, ObjectType } from 'typeorm';
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-import { CoreServer } from './core/server';
-export class MagnusServer extends CoreServer {
-    createQueryByEntity(entity: ObjectType<any>) {
-        if (this._connection) {
-            const repository = this._connection.getRepository(entity);
-            return {
-                hasId: <Entity>(entity: Entity) => repository.hasId(entity),
-                getId: <Entity>(entity: Entity) => repository.getId(entity),
-                find: <Entity>(tions?: FindManyOptions<Entity> | FindConditions<Entity>) => repository.find(tions),
-                findAndCount: <Entity>(tions?: FindManyOptions<Entity> | FindConditions<Entity>) => repository.findAndCount(tions),
-                count: <Entity>(tions?: FindManyOptions<Entity> | FindConditions<Entity>) => repository.count(tions),
-                findByIds: <Entity>(ids: any[], tions?: FindManyOptions<Entity> | FindConditions<Entity>) => repository.findByIds(ids, tions),
-                findOne: <Entity>(id?: string | number | Date | ObjectID, options?: FindOneOptions<Entity>, conditions?: FindConditions<Entity>) => {
-                    if (id) {
-                        repository.findOne(id, options);
-                    } else if (conditions) {
-                        repository.findOne(conditions, options);
-                    } else {
-                        repository.findOne(options);
-                    }
+import { Module, Inject, OnModuleInit } from '@nestjs/common'
+import { HttpAdapterHost } from '@nestjs/core'
+import { CoreServer } from './core/server'
+import { ConnectionOptions } from 'typeorm';
+export const MAGNUS_TYPEORM_OPTIONS = 'MAGNUS_TYPEORM_OPTIONS';
+export const MAGNUS_CONFIG = 'MAGNUS_CONFIG';
+export { ConnectionOptions }
+export interface NagnusConfig {
+    path?: string;
+    cors?: boolean;
+    bodyParserConfig?: boolean;
+    installSubscriptionHandlers?: boolean;
+}
 
+@Module({
+    providers: [],
+    exports: []
+})
+export class MagnusServerModule implements OnModuleInit {
+    constructor(
+        private readonly httpAdapterHost: HttpAdapterHost,
+        @Inject(MAGNUS_TYPEORM_OPTIONS) private readonly options: ConnectionOptions,
+        @Inject(MAGNUS_CONFIG) private readonly config: NagnusConfig
+    ) { }
+    static forRoot(options: ConnectionOptions, config: NagnusConfig) {
+        return {
+            module: MagnusServerModule,
+            providers: [
+                {
+                    provide: MAGNUS_TYPEORM_OPTIONS,
+                    useValue: options,
                 },
-                findOneOrFail: <Entity>(id?: string | number | Date | ObjectID, options?: FindOneOptions<Entity>, conditions?: FindConditions<Entity>) => {
-                    if (id) {
-                        repository.findOneOrFail(id, options);
-                    } else if (conditions) {
-                        repository.findOneOrFail(conditions, options);
-                    } else {
-                        repository.findOneOrFail(options);
-                    }
-                },
-                query: (query: string, parameters?: any[]) => repository.query(query, parameters),
-
-
-
-
-
-            }
+                {
+                    provide: MAGNUS_CONFIG,
+                    useValue: config
+                }
+            ]
         }
     }
-    createMutationByEntity(entity: ObjectType<any>) {
-        if (this._connection) {
-            const repository = this._connection.getRepository(entity);
-            return {
-                create: <Entity>(entityLike?: DeepPartial<Entity>) => {
-                    if (entityLike) {
-                        repository.create(entityLike);
-                    } else {
-                        repository.create();
-                    }
-                },
-                merge: <Entity>(mergeIntoEntity: Entity, ...entityLikes: DeepPartial<Entity>[]) => repository.merge(mergeIntoEntity, ...entityLikes),
-                preload: <Entity>(entityLike: DeepPartial<Entity>) => repository.preload(entityLike),
-                save: <T, SaveOptions>(entities: T[], options: SaveOptions & {
-                    reload: false;
-                }) => repository.save(entities, options),
-                remove: <Entity, RemoveOptions>(entity: Entity[] | Entity, options?: RemoveOptions) => repository.remove(entity, options),
-                insert: <Entity>(entity: QueryDeepPartialEntity<Entity> | (QueryDeepPartialEntity<Entity>[])) => repository.insert(entity),
-                update: <Entity>(criteria: string | string[] | number | number[] | Date | Date[] | ObjectID | ObjectID[] | FindConditions<Entity>,
-                    partialEntity: QueryDeepPartialEntity<Entity>) => repository.update(criteria, partialEntity),
-                delete: <Entity>(criteria: string | string[] | number | number[] | Date | Date[] | ObjectID | ObjectID[] | FindConditions<Entity>) => repository.delete(criteria),
-                clear: () => repository.clear(),
-                increment: <Entity>(conditions: FindConditions<Entity>, propertyPath: string, value: number | string) => repository.increment(conditions, propertyPath, value),
-                decrement: <Entity>(conditions: FindConditions<Entity>, propertyPath: string, value: number | string) => repository.decrement(conditions, propertyPath, value),
-
-            }
-        }
+    async onModuleInit() {
+        await this.create(this.httpAdapterHost, this.options, this.config)
     }
-    createSubscriptionByEntity(entity: ObjectType<any>) {
-        if (this._connection) {
-            return {}
+    async create(httpAdapterHost: HttpAdapterHost, options: ConnectionOptions, config: NagnusConfig) {
+        if (!httpAdapterHost) {
+            return;
         }
+        const httpAdapter = httpAdapterHost.httpAdapter;
+        if (!httpAdapter) {
+            return;
+        }
+        const app = httpAdapter.getInstance();
+        const server = new CoreServer(options);
+        const apolloServer = await server.init();
+        (apolloServer.applyMiddleware as any)({
+            app,
+            path: config.path ? config.path : `/`,
+            cors: !!config.cors,
+            bodyParserConfig: config.bodyParserConfig
+        });
+        if (!!config.installSubscriptionHandlers) {
+            apolloServer.installSubscriptionHandlers(
+                httpAdapter.getHttpServer(),
+            );
+        }
+        return;
     }
 }

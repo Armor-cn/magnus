@@ -1,93 +1,110 @@
 import { createConnection, Connection, ConnectionOptions, ObjectType } from 'typeorm';
-import { ApolloServer, gql } from 'apollo-server';
-import { DocumentNode } from 'graphql';
+import { ApolloServer } from 'apollo-server-express';
+import { GraphQLScalarType } from 'graphql';
+import { Kind } from 'graphql/language';
+import { compile } from './compiler/compile'
 import { IResolvers } from 'graphql-tools';
-export abstract class CoreServer {
+import { Resolver } from './compiler/resolver'
+import { lowerFirst, upperFirst } from 'lodash';
+
+export class CoreServer {
+    resolver: Resolver<any>[] = [];
     constructor(
         protected _options: ConnectionOptions,
         protected _connection?: Connection,
         protected _server?: ApolloServer
     ) { }
 
-    async init(def: string) {
+    async init(): Promise<ApolloServer> {
         this._connection = await createConnection(this._options);
-        this._server = new ApolloServer({
-            typeDefs: this.createTypeDefs(def),
-            resolvers: this.createResolvers(),
-            playground: true
+        const entities = this._options.entities || [];
+        entities.map(entity => {
+            if (this._connection) {
+                const meta = this._connection.getMetadata(entity);
+                const res = this._connection.getRepository(meta.target)
+                this.resolver.push(new Resolver(res, meta.name))
+            }
         });
-    }
-    listen(port: number) {
-        if (this._server) {
-            return this._server.listen(port)
-        }
+        const config = {
+            typeDefs: compile(this._connection, this._options.entities as any),
+            resolvers: {
+                ...this.createResolvers()
+            },
+            playground: true,
+        };
+        this._server = new ApolloServer(config);
+        return this._server;
     }
 
     createMutation() {
-        let options = {};
-        if (this._options.entities) {
-            this._options.entities.map(type => {
-                if (typeof type === 'string') {
-                    // path
-                } else if (typeof type === 'function') {
-                    options = {
-                        ...options,
-                        ...this.createMutationByEntity(type)
-                    }
-                } else {
-                    // schema
-                }
-            })
-        }
+        const options: any = {};
+        this.resolver.map(res => {
+            options[`${res.name}`] = (...args: any[]) => {
+                const query: any = res.getMutation();
+                options[`${res.name}`] = () => query;
+                Object.keys(query).map(key => {
+                    options[`${lowerFirst(res.name)}${upperFirst(key)}`] = query[`${key}`];
+                });
+            }
+        });
         return options;
     }
     createQuery() {
-        let options = {};
-        if (this._options.entities) {
-            this._options.entities.map(type => {
-                if (typeof type === 'string') {
-                    // path
-                } else if (typeof type === 'function') {
-                    options = {
-                        ...options,
-                        ...this.createQueryByEntity(type)
-                    }
-                } else {
-                    // schema
-                }
-            })
-        }
+        const options: any = {};
+        this.resolver.map(res => {
+            const query: any = res.getQuery();
+            options[`${res.name}`] = () => query;
+            Object.keys(query).map(key => {
+                options[`${lowerFirst(res.name)}${upperFirst(key)}`] = query[`${key}`];
+            });
+        });
         return options;
     }
     createSubscription() {
-        let options = {};
-        if (this._options.entities) {
-            this._options.entities.map(type => {
-                if (typeof type === 'string') {
-                    // path
-                } else if (typeof type === 'function') {
-                    options = {
-                        ...options,
-                        ...this.createSubscriptionByEntity(type)
-                    }
-                } else {
-                    // schema
-                }
-            })
-        }
+        const options: any = {};
+        this.resolver.map(res => {
+            const query: any = res.getSubscribtion();
+            options[`${res.name}`] = () => query;
+            Object.keys(query).map(key => {
+                options[`${lowerFirst(res.name)}${upperFirst(key)}`] = query[`${key}`];
+            });
+        });
         return options;
     }
-    abstract createMutationByEntity(entity: ObjectType<any>): object | undefined;
-    abstract createQueryByEntity(entity: ObjectType<any>): object | undefined;
-    abstract createSubscriptionByEntity(entity: ObjectType<any>): object | undefined;
     createResolvers(): IResolvers {
         return {
             Query: this.createQuery(),
             Mutation: this.createMutation(),
-            Subscription: this.createSubscription()
+            ObjectLiteral: new GraphQLScalarType({
+                name: 'ObjectLiteral',
+                parseValue(value: string) {
+                    return JSON.parse(value);
+                },
+                serialize(value: any) {
+                    return JSON.stringify(value)
+                },
+                parseLiteral(ast) {
+                    if (ast.kind === Kind.STRING) {
+                        return JSON.parse(ast.value);
+                    }
+                    return null;
+                }
+            }),
+            Date: new GraphQLScalarType({
+                name: 'Date',
+                parseValue(value: string) {
+                    return new Date(value);
+                },
+                serialize(value: Date) {
+                    return value.getTime()
+                },
+                parseLiteral(ast) {
+                    if (ast.kind === Kind.STRING) {
+                        return new Date(ast.value);
+                    }
+                    return null;
+                }
+            })
         }
-    }
-    createTypeDefs(graphql: string): DocumentNode | Array<DocumentNode> {
-        return gql`${graphql}`;
     }
 }

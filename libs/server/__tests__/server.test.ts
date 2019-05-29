@@ -1,23 +1,17 @@
-import { MagnusServer } from '../lib/index'
-import { readFileSync } from 'fs-extra'
-import { join } from 'path'
-import { readFile } from 'fs';
+import { CoreServer } from '../lib/core/server'
+import entities from './entities';
+
 async function bootstrap() {
-    const server = new MagnusServer({
+    const server = new CoreServer({
         type: 'postgres',
         host: 'localhost',
-        username: 'postgres',
-        password: 'postgres',
-        database: 'test_ci',
+        username: 'prisma',
+        password: 'prisma',
+        database: 'prisma',
         port: 5432,
-        entities: []
+        entities: entities,
+        synchronize: true
     });
-    const gpl = readFileSync(join(__dirname, 'test.graphql')).toString('utf8')
-    await server.init(gpl);
-    const listen = server.listen(9000);
-    if (listen) listen.then(({ url }) => {
-        console.log(`app start ${url}`)
-    })
+    await server.init();
 }
-
 bootstrap();
