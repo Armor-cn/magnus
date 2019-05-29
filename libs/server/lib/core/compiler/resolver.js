@@ -198,10 +198,7 @@ class Resolver {
         return { data: data };
     }
     async findOne(options) {
-        const data = await this.repository.findOne(options);
-        if (data) {
-            return { data };
-        }
+        return await this.repository.findOne(options);
     }
 }
 exports.Resolver = Resolver;

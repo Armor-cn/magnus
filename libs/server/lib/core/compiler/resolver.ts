@@ -224,10 +224,7 @@ export class Resolver<T> {
         const data = await this.repository.findByIds(options.ids, options.options);
         return { data: data }
     }
-    async findOne(options: FindOneOptions<T>): Promise<SignalResult<T> | undefined> {
-        const data = await this.repository.findOne(options);
-        if (data) {
-            return { data }
-        }
+    async findOne(options: FindOneOptions<T>): Promise<T | undefined> {
+        return await this.repository.findOne(options);
     }
 }

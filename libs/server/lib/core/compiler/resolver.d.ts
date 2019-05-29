@@ -70,7 +70,7 @@ export declare class Resolver<T> {
         }>) => Promise<MultiResult<T>>;
         findOne: (...args: Args<{
             options: FindOneOptions<T>;
-        }>) => Promise<SignalResult<T> | undefined> | undefined;
+        }>) => Promise<T | undefined> | undefined;
     };
     getMutation(): {
         save: (...args: Args<{
@@ -111,6 +111,6 @@ export declare class Resolver<T> {
     findManyAndCount(options?: FindManyOptions<T>): Promise<FindAndCountResultInput<T>>;
     findAndCount(conditions?: FindConditions<T>): Promise<FindAndCountResultInput<T>>;
     findByIds(options: FindByIdsType<T>): Promise<MultiResult<T>>;
-    findOne(options: FindOneOptions<T>): Promise<SignalResult<T> | undefined>;
+    findOne(options: FindOneOptions<T>): Promise<T | undefined>;
 }
 export {};
