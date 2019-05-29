@@ -13,7 +13,7 @@ import { NestFactory } from '@nestjs/core';
             port: 5432,
             entities: entities,
             synchronize: true
-        }, {})
+        })
     ],
     providers: []
 })
