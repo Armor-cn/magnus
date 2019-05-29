@@ -435,10 +435,12 @@ function checkRequired(column) {
     let required = false;
     // 如果可以不是null
     if (!column.isNullable) {
-        if (!column.default) {
+        if (!column.default || column.isUpdateDate || column.isCreateDate || column.isGenerated) {
             required = false;
         }
-        required = true;
+        else {
+            required = true;
+        }
     }
     return required;
 }
