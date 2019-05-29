@@ -59,12 +59,6 @@ class CompilerVisitor {
                     new ast.PropertyAst(`options`, new ast.TypeAst(`SaveOptions`).visit(this, context), false).visit(this, context)
                 ];
                 break;
-            case `${context.name}RemoveInput`:
-                item.properties = [
-                    new ast.PropertyAst(`data`, new ast.TypeAst(context.name).visit(this, context), true).visit(this, context),
-                    new ast.PropertyAst(`options`, new ast.TypeAst(`RemoveOptions`).visit(this, context), false).visit(this, context)
-                ];
-                break;
             case `${context.name}InsertResult`:
                 item.properties = [
                     new ast.PropertyAst(`identifiers`, new ast.ObjectLiteralAst(), true),
@@ -145,7 +139,6 @@ class CompilerVisitor {
                 ];
                 break;
             case `${context.name}`:
-            case `${context.name}Input`:
                 item.properties = [
                     ...context.ownColumns.map(column => {
                         const required = checkRequired(column);
@@ -162,6 +155,26 @@ class CompilerVisitor {
                         }
                         else {
                             return new ast.PropertyAst(column.propertyName, type, true);
+                        }
+                    })
+                ];
+                break;
+            case `${context.name}Input`:
+                item.properties = [
+                    ...context.ownColumns.map(column => {
+                        const type = createType(column);
+                        if (column.isVirtual) {
+                            return new ast.EmptyAst(``);
+                        }
+                        return new ast.PropertyAst(column.propertyName, type, false);
+                    }),
+                    ...context.relations.map(column => {
+                        const type = createRelationType(column);
+                        if (column.isOneToMany || column.isManyToMany) {
+                            return new ast.PropertyAst(column.propertyName, new ast.ArrayAst(type, true), false);
+                        }
+                        else {
+                            return new ast.PropertyAst(column.propertyName, type, false);
                         }
                     })
                 ];
@@ -278,7 +291,7 @@ class CompilerVisitor {
                 item.returnType = new ast.TypeAst(`${context.name}`).visit(this, context);
                 item.requiredReturn = true;
                 item.parameters = [
-                    new ast.ParameterAst(0, `entity`, new ast.TypeAst(`${context.name}`).visit(this, context), true).visit(this, context),
+                    new ast.ParameterAst(0, `entity`, new ast.TypeAst(`${context.name}Input`).visit(this, context), true).visit(this, context),
                     new ast.ParameterAst(0, `options`, new ast.TypeAst(`RemoveOptions`).visit(this, context), false).visit(this, context)
                 ];
                 break;

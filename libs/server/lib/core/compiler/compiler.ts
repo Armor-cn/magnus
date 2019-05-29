@@ -67,20 +67,6 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                     ).visit(this, context)
                 ];
                 break;
-            case `${context.name}RemoveInput`:
-                item.properties = [
-                    new ast.PropertyAst(
-                        `data`,
-                        new ast.TypeAst(context.name).visit(this, context),
-                        true
-                    ).visit(this, context),
-                    new ast.PropertyAst(
-                        `options`,
-                        new ast.TypeAst(`RemoveOptions`).visit(this, context),
-                        false
-                    ).visit(this, context)
-                ];
-                break;
             case `${context.name}InsertResult`:
                 item.properties = [
                     new ast.PropertyAst(
@@ -249,7 +235,6 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                 ];
                 break;
             case `${context.name}`:
-            case `${context.name}Input`:
                 item.properties = [
                     ...context.ownColumns.map(column => {
                         const required = checkRequired(column);
@@ -276,6 +261,37 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                                 column.propertyName,
                                 type,
                                 true
+                            )
+                        }
+                    })
+                ];
+                break;
+            case `${context.name}Input`:
+                item.properties = [
+                    ...context.ownColumns.map(column => {
+                        const type: ast.AstType = createType(column);
+                        if (column.isVirtual) {
+                            return new ast.EmptyAst(``)
+                        }
+                        return new ast.PropertyAst(
+                            column.propertyName,
+                            type,
+                            false
+                        )
+                    }),
+                    ...context.relations.map(column => {
+                        const type: ast.AstType = createRelationType(column);
+                        if (column.isOneToMany || column.isManyToMany) {
+                            return new ast.PropertyAst(
+                                column.propertyName,
+                                new ast.ArrayAst(type, true),
+                                false
+                            )
+                        } else {
+                            return new ast.PropertyAst(
+                                column.propertyName,
+                                type,
+                                false
                             )
                         }
                     })
@@ -468,7 +484,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                     new ast.ParameterAst(
                         0,
                         `entity`,
-                        new ast.TypeAst(`${context.name}`).visit(this, context),
+                        new ast.TypeAst(`${context.name}Input`).visit(this, context),
                         true
                     ).visit(this, context),
                     new ast.ParameterAst(
