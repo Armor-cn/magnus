@@ -9,17 +9,23 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const ast = __importStar(require("./ast"));
 class Compiler {
-    constructor(meta) {
-        this.meta = meta;
+    constructor(connection, entities) {
+        this.connection = connection;
+        this.entities = entities;
         this.progress = new ast.ProgressAst();
         const visitor = new CompilerVisitor();
-        this.progress.visit(visitor, meta);
+        const options = { connection, entities };
+        this.progress.visit(visitor, options);
     }
 }
 exports.Compiler = Compiler;
 class CompilerVisitor {
     visitProgressAst(item, context) {
-        const metas = context;
+        context.entities.map((entity) => {
+            const meta = context.connection.getMetadata(entity);
+            const doc = new ast.DocumentAst(meta.name);
+            item.docs.push(doc.visit(this, meta));
+        });
         item.scalars.push(new ast.ScalarAst(`ObjectLiteral`));
         item.scalars.push(new ast.ScalarAst(`Date`));
         item.enums.push(new ast.EnumAst(`MutationType`, [
@@ -31,10 +37,6 @@ class CompilerVisitor {
             'ASC',
             'DESC'
         ]));
-        metas.map(meta => {
-            const doc = new ast.DocumentAst(meta.name);
-            item.docs.push(doc.visit(this, meta));
-        });
         this.progress = item;
         return item;
     }
@@ -95,7 +97,7 @@ class CompilerVisitor {
                 break;
             case `${context.name}FindConditions`:
                 item.properties = [
-                    ...context.columns.map(column => {
+                    ...context.ownColumns.map(column => {
                         const type = createType(column);
                         if (column.isVirtual) {
                             return new ast.EmptyAst(``);
@@ -150,7 +152,7 @@ class CompilerVisitor {
             case `${context.name}`:
             case `${context.name}Input`:
                 item.properties = [
-                    ...context.columns.map(column => {
+                    ...context.ownColumns.map(column => {
                         const required = checkRequired(column);
                         const type = createType(column);
                         if (column.isVirtual) {
@@ -234,7 +236,7 @@ class CompilerVisitor {
                 break;
             case `${context.name}Order`:
                 item.properties = [
-                    ...context.columns.map(column => {
+                    ...context.ownColumns.map(column => {
                         if (column.isVirtual) {
                             return new ast.EmptyAst(``);
                         }
@@ -478,13 +480,21 @@ function createTypeByName(name) {
     switch (name) {
         case 'String':
         case 'varchar':
+        case `text`:
+        case `uuid`:
             return new ast.StringAst();
         case 'Number':
+        case 'smallint':
+        case 'int':
+        case 'bigint':
             return new ast.IntAst();
         case 'Float':
             return new ast.FloatAst();
         case 'Boolean':
             return new ast.BooleanAst();
+        case 'timestamp':
+        case `timestamptz`:
+            return new ast.UseAst(`Date`);
         default:
             if (name.length > 0) {
                 return new ast.UseAst(name);

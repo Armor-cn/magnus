@@ -1,7 +1,7 @@
-import { Module, Inject } from '@nestjs/Common'
-import { HttpAdapterHost } from '@nestjs/core'
-import { MagnusServerModule, MAGNUS_TYPEORM_OPTIONS, MAGNUS_CONFIG, NagnusConfig, ConnectionOptions } from '../../lib/index';
-import { User, Post } from '../entities/user.entity';
+import { Module } from '@nestjs/Common'
+import { MagnusServerModule } from '../../lib/index';
+import entities from '../entities';
+
 import { NestFactory } from '@nestjs/core';
 @Module({
     imports: [
@@ -12,10 +12,7 @@ import { NestFactory } from '@nestjs/core';
             password: 'prisma',
             database: 'prisma',
             port: 5432,
-            entities: [
-                User,
-                Post
-            ]
+            entities: entities
         }, {})
     ],
     providers: []

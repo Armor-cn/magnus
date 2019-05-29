@@ -1,21 +1,25 @@
-import { EntityMetadata } from 'typeorm';
+import { EntityMetadata, ObjectType, Connection } from 'typeorm';
 import * as ast from './ast';
 import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
 import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
-
 export class Compiler {
     progress: ast.ProgressAst;
-    constructor(public meta: EntityMetadata[]) {
+    constructor(public connection: Connection, public entities: ObjectType<any>[]) {
         this.progress = new ast.ProgressAst();
         const visitor = new CompilerVisitor();
-        this.progress.visit(visitor, meta)
+        const options: any = { connection, entities };
+        this.progress.visit(visitor, options)
     }
 }
 
 export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
     progress: ast.ProgressAst;
     visitProgressAst(item: ast.ProgressAst, context: any): any {
-        const metas = context as EntityMetadata[];
+        context.entities.map((entity: any) => {
+            const meta = context.connection.getMetadata(entity)
+            const doc = new ast.DocumentAst(meta.name);
+            item.docs.push(doc.visit(this, meta))
+        })
         item.scalars.push(new ast.ScalarAst(`ObjectLiteral`))
         item.scalars.push(new ast.ScalarAst(`Date`))
         item.enums.push(new ast.EnumAst(`MutationType`, [
@@ -29,10 +33,6 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                 'DESC'
             ])
         );
-        metas.map(meta => {
-            const doc = new ast.DocumentAst(meta.name);
-            item.docs.push(doc.visit(this, meta))
-        });
         this.progress = item;
         return item;
     }
@@ -149,7 +149,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                 break;
             case `${context.name}FindConditions`:
                 item.properties = [
-                    ...context.columns.map(column => {
+                    ...context.ownColumns.map(column => {
                         const type: ast.AstType = createType(column);
                         if (column.isVirtual) {
                             return new ast.EmptyAst(``)
@@ -260,7 +260,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
             case `${context.name}`:
             case `${context.name}Input`:
                 item.properties = [
-                    ...context.columns.map(column => {
+                    ...context.ownColumns.map(column => {
                         const required = checkRequired(column);
                         const type: ast.AstType = createType(column);
                         if (column.isVirtual) {
@@ -407,7 +407,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                 break;
             case `${context.name}Order`:
                 item.properties = [
-                    ...context.columns.map(column => {
+                    ...context.ownColumns.map(column => {
                         if (column.isVirtual) {
                             return new ast.EmptyAst(``)
                         }
@@ -731,13 +731,21 @@ function createTypeByName(name: string) {
     switch (name) {
         case 'String':
         case 'varchar':
+        case `text`:
+        case `uuid`:
             return new ast.StringAst();
         case 'Number':
+        case 'smallint':
+        case 'int':
+        case 'bigint':
             return new ast.IntAst();
         case 'Float':
             return new ast.FloatAst();
         case 'Boolean':
             return new ast.BooleanAst();
+        case 'timestamp':
+        case `timestamptz`:
+            return new ast.UseAst(`Date`);
         default:
             if (name.length > 0) {
                 return new ast.UseAst(name)

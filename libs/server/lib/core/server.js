@@ -16,15 +16,16 @@ class CoreServer {
     }
     async init() {
         this._connection = await typeorm_1.createConnection(this._options);
-        const metadatas = this._connection.entityMetadatas;
-        metadatas.map(meta => {
+        const entities = this._options.entities || [];
+        entities.map(entity => {
             if (this._connection) {
+                const meta = this._connection.getMetadata(entity);
                 const res = this._connection.getRepository(meta.target);
                 this.resolver.push(new resolver_1.Resolver(res, meta.name));
             }
         });
         const config = {
-            typeDefs: compile_1.compile(this._connection),
+            typeDefs: compile_1.compile(this._connection, this._options.entities),
             resolvers: {
                 ...this.createResolvers()
             },

@@ -1,9 +1,10 @@
-import { EntityMetadata } from 'typeorm';
+import { EntityMetadata, ObjectType, Connection } from 'typeorm';
 import * as ast from './ast';
 export declare class Compiler {
-    meta: EntityMetadata[];
+    connection: Connection;
+    entities: ObjectType<any>[];
     progress: ast.ProgressAst;
-    constructor(meta: EntityMetadata[]);
+    constructor(connection: Connection, entities: ObjectType<any>[]);
 }
 export declare class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
     progress: ast.ProgressAst;

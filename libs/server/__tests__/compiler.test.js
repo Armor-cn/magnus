@@ -1,8 +1,11 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const compile_1 = require("../lib/core/compiler/compile");
 const typeorm_1 = require("typeorm");
-const user_entity_1 = require("./entities/user.entity");
+const entities_1 = __importDefault(require("./entities"));
 async function bootstrap() {
     const connection = await typeorm_1.createConnection({
         type: 'postgres',
@@ -11,12 +14,8 @@ async function bootstrap() {
         password: 'prisma',
         database: 'prisma',
         port: 5432,
-        entities: [
-            user_entity_1.User,
-            user_entity_1.Post
-        ]
+        entities: entities_1.default
     });
-    const nodes = compile_1.compile(connection);
-    debugger;
+    const nodes = compile_1.compile(connection, entities_1.default);
 }
 bootstrap();

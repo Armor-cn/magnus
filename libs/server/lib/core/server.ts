@@ -17,15 +17,16 @@ export class CoreServer {
 
     async init(): Promise<ApolloServer> {
         this._connection = await createConnection(this._options);
-        const metadatas = this._connection.entityMetadatas;
-        metadatas.map(meta => {
+        const entities = this._options.entities || [];
+        entities.map(entity => {
             if (this._connection) {
+                const meta = this._connection.getMetadata(entity);
                 const res = this._connection.getRepository(meta.target)
                 this.resolver.push(new Resolver(res, meta.name))
             }
         });
         const config = {
-            typeDefs: compile(this._connection),
+            typeDefs: compile(this._connection, this._options.entities as any),
             resolvers: {
                 ...this.createResolvers()
             },

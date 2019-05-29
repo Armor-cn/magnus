@@ -1,5 +1,6 @@
 import { CoreServer } from '../lib/core/server'
-import { User, Post } from './entities/user.entity'
+import entities from './entities';
+
 async function bootstrap() {
     const server = new CoreServer({
         type: 'postgres',
@@ -8,10 +9,7 @@ async function bootstrap() {
         password: 'prisma',
         database: 'prisma',
         port: 5432,
-        entities: [
-            User,
-            Post
-        ],
+        entities: entities,
         synchronize: true
     });
     await server.init();
