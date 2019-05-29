@@ -13,9 +13,10 @@ enum OrderType {
 }
 
 input User {
-	id:Int
+	id:Int!
 	key:String!
 	title:String!
+	posts:[Post!]
 }
 input SaveOptions {
 	listeners:Boolean
@@ -29,9 +30,10 @@ input RemoveOptions {
 	chunk:Int
 }
 input UserInput {
-	id:Int
+	id:Int!
 	key:String!
 	title:String!
+	posts:[Post!]
 }
 input UserFindConditions {
 	id:Int
@@ -72,11 +74,64 @@ input UserFindOneQuery {
 input UserWatchInput {
 	mutation_in:MutationType
 }
-
-type UserOutput {
-	id:Int
+input Post {
+	id:Int!
 	key:String!
 	title:String!
+	
+	
+	user:User!
+}
+input PostInput {
+	id:Int!
+	key:String!
+	title:String!
+	
+	
+	user:User!
+}
+input PostFindConditions {
+	id:Int
+	key:String
+	title:String
+	
+	
+}
+input PostOrder {
+	id:OrderType
+	key:OrderType
+	title:OrderType
+	
+	
+}
+input PostFindManyOptions {
+	skip:Int
+	take:Int
+	where:PostFindConditions
+	relations:[String!]
+	join:JoinOptions
+	order:PostOrder
+}
+input PostFindQuery {
+	where:PostFindConditions!
+	entity:Post!
+}
+input PostFindByIdsQuery {
+	ids:[String!]!
+	options:PostFindManyOptions
+}
+input PostFindOneQuery {
+	options:ObjectLiteral
+}
+input PostWatchInput {
+	mutation_in:MutationType
+}
+
+type UserOutput {
+	id:Int!
+	key:String!
+	title:String!
+	posts:[PostOutput!]
 }
 type UserInsertResult {
 	identifiers:ObjectLiteral!
@@ -125,16 +180,74 @@ type UserWatchResult {
 type UserSubscription {
 	watch(options: UserWatchInput!): UserWatchResult!
 }
+type PostOutput {
+	id:Int!
+	key:String!
+	title:String!
+	
+	
+	user:UserOutput!
+}
+type PostInsertResult {
+	identifiers:ObjectLiteral!
+	generatedMaps:ObjectLiteral!
+	raw:PostOutput!
+}
+type PostUpdateResult {
+	raw:PostOutput!
+	generatedMaps:ObjectLiteral!
+}
+type PostDeleteResult {
+	raw:PostOutput!
+	affected:Int
+}
+type PostMutation {
+	save(entity: Post!, options: SaveOptions): PostOutput!
+	remove(entity: Post!, options: RemoveOptions): PostOutput!
+	insert(options: PostInput!): PostInsertResult!
+	update(where: PostFindConditions!, options: Post!): PostUpdateResult!
+	delete(options: PostFindConditions!): PostDeleteResult!
+}
+type PostCountResult {
+	count:Int!
+}
+type PostFindResult {
+	data:[PostOutput!]!
+}
+type PostFindAndCountResult {
+	count:Int!
+	data:[PostOutput!]!
+}
+type PostFindByIdsResult {
+	data:[PostOutput!]!
+}
+type PostQuery {
+	count(options: PostFindManyOptions): PostCountResult!
+	find(options: PostFindQuery!): PostFindResult!
+	findAndCount(options: PostFindManyOptions!): PostFindAndCountResult!
+	findByIds(options: PostFindByIdsQuery!): PostFindByIdsResult!
+	findOne(options: PostFindOneQuery!): PostOutput
+}
+type PostWatchResult {
+	data:PostOutput!
+	action:MutationType!
+}
+type PostSubscription {
+	watch(options: PostWatchInput!): PostWatchResult!
+}
 
 type Query {
 	User:UserQuery!
-}
+	Post:PostQuery!
 
-type Mutation {
-	User:UserMutation!
 }
-
 type Subscription {
 	User:UserSubscription!
+	Post:PostSubscription!
+ 
 }
-
+type Mutation {
+	User:UserMutation!
+	Post:PostMutation!
+ 
+}

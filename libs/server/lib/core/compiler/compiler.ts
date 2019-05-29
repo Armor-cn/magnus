@@ -1,17 +1,41 @@
 import { EntityMetadata } from 'typeorm';
 import * as ast from './ast';
+import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
+import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
 
-export class Compiler<T> {
-    document: ast.DocumentAst;
-    constructor(public meta: EntityMetadata) {
-        this.document = new ast.DocumentAst();
+export class Compiler {
+    progress: ast.ProgressAst;
+    constructor(public meta: EntityMetadata[]) {
+        this.progress = new ast.ProgressAst();
         const visitor = new CompilerVisitor();
-        this.document.visit(visitor, meta)
+        this.progress.visit(visitor, meta)
     }
 }
 
 export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
-    document: ast.DocumentAst;
+    progress: ast.ProgressAst;
+    visitProgressAst(item: ast.ProgressAst, context: any): any {
+        const metas = context as EntityMetadata[];
+        item.scalars.push(new ast.ScalarAst(`ObjectLiteral`))
+        item.scalars.push(new ast.ScalarAst(`Date`))
+        item.enums.push(new ast.EnumAst(`MutationType`, [
+            'CREATED',
+            'UPDATED',
+            'DELETED'
+        ]));
+        item.enums.push(
+            new ast.EnumAst(`OrderType`, [
+                'ASC',
+                'DESC'
+            ])
+        );
+        metas.map(meta => {
+            const doc = new ast.DocumentAst();
+            item.docs.push(doc.visit(this, meta))
+        });
+        this.progress = item;
+        return item;
+    }
     visitDateAst(item: ast.TypeAst, context: EntityMetadata) {
         return item;
     }
@@ -126,29 +150,15 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
             case `${context.name}FindConditions`:
                 item.properties = [
                     ...context.columns.map(column => {
-                        let name = ``;
-                        if (typeof column.type === 'string') {
-                            name = column.type;
-                        } else {
-                            name = (column.type as any).name;
-                        }
-                        let type: ast.AstType;
-                        if (column.isCreateDate) {
-                            type = new ast.DateAst();
-                        } else if (column.isUpdateDate) {
-                            type = new ast.DateAst();
-                        } else if (column.isGenerated) {
-                            type = new ast.IntAst();
-                        } else if (column.isObjectId) {
-                            type = new ast.IdAst();
-                        } else {
-                            type = this.createTypeByName(name)
+                        const type: ast.AstType = createType(column);
+                        if (column.isVirtual) {
+                            return new ast.EmptyAst(``)
                         }
                         return new ast.PropertyAst(
                             column.propertyName,
                             type,
                             false
-                        )
+                        );
                     })
                 ];
                 break;
@@ -251,33 +261,32 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
             case `${context.name}Input`:
                 item.properties = [
                     ...context.columns.map(column => {
-                        let name = ``;
-                        let required = false;
-                        if (typeof column.type === 'string') {
-                            name = column.type;
-                        } else {
-                            name = (column.type as any).name;
-                        }
-                        let type: ast.AstType;
-                        if (column.isCreateDate) {
-                            type = new ast.DateAst();
-                        } else if (column.isUpdateDate) {
-                            type = new ast.DateAst();
-                        } else if (column.isGenerated) {
-                            type = new ast.IntAst();
-                        } else if (column.isObjectId) {
-                            type = new ast.IdAst();
-                        } else {
-                            if (!column.isNullable) {
-                                required = true;
-                            }
-                            type = this.createTypeByName(name)
+                        const required = checkRequired(column);
+                        const type: ast.AstType = createType(column);
+                        if (column.isVirtual) {
+                            return new ast.EmptyAst(``)
                         }
                         return new ast.PropertyAst(
                             column.propertyName,
                             type,
                             required
                         )
+                    }),
+                    ...context.relations.map(column => {
+                        const type: ast.AstType = createRelationType(column);
+                        if (column.isOneToMany || column.isManyToMany) {
+                            return new ast.PropertyAst(
+                                column.propertyName,
+                                new ast.ArrayAst(type, true),
+                                false
+                            )
+                        } else {
+                            return new ast.PropertyAst(
+                                column.propertyName,
+                                type,
+                                true
+                            )
+                        }
                     })
                 ];
                 break;
@@ -399,6 +408,9 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
             case `${context.name}Order`:
                 item.properties = [
                     ...context.columns.map(column => {
+                        if (column.isVirtual) {
+                            return new ast.EmptyAst(``)
+                        }
                         return new ast.PropertyAst(
                             column.propertyName,
                             new ast.UseAst(`OrderType`),
@@ -422,22 +434,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
         }
         return item;
     }
-    createTypeByName(name: string) {
-        switch (name) {
-            case 'String':
-            case 'varchar':
-                return new ast.StringAst();
-            case 'Number':
-                return new ast.IntAst();
-            case 'Float':
-                return new ast.FloatAst();
-            case 'Boolean':
-                return new ast.BooleanAst();
-            default:
-                debugger;
-                return new ast.TypeAst(name)
-        }
-    }
+
     visitParameterAst(item: ast.ParameterAst, context: EntityMetadata) {
         return item;
     }
@@ -671,20 +668,81 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
         item.mutation = new ast.MutationAst().visit(this, context);
         item.query = new ast.QueryAst().visit(this, context);
         item.subscription = new ast.SubscriptionAst().visit(this, context);
-        item.scalars.push(new ast.ScalarAst(`ObjectLiteral`))
-        item.scalars.push(new ast.ScalarAst(`Date`))
-        item.enums.push(new ast.EnumAst(`MutationType`, [
-            'CREATED',
-            'UPDATED',
-            'DELETED'
-        ]));
-        item.enums.push(
-            new ast.EnumAst(`OrderType`, [
-                'ASC',
-                'DESC'
-            ])
-        )
-        this.document = item;
         return item;
+    }
+    visitEmptyAst(item: ast.EmptyAst, context: EntityMetadata) {
+        return item;
+    }
+}
+
+function checkRelationRequired(column: RelationMetadata) {
+    let required = false;
+    // 如果可以不是null
+    if (!column.isNullable) {
+        required = true;
+    }
+    return required;
+}
+function checkRequired(column: ColumnMetadata) {
+    let required = false;
+    // 如果可以不是null
+    if (!column.isNullable) {
+        if (!column.default) {
+            required = false;
+        }
+        required = true;
+    }
+    return required;
+}
+
+function createName(column: ColumnMetadata | RelationMetadata) {
+    let name = ``;
+    if (typeof column.type === 'string') {
+        name = column.type;
+    } else {
+        name = (column.type as any).name;
+    }
+    return name;
+}
+
+function createType(column: ColumnMetadata): ast.AstType {
+    let type: ast.AstType;
+    if (column.isCreateDate) {
+        type = new ast.DateAst();
+    } else if (column.isUpdateDate) {
+        type = new ast.DateAst();
+    } else if (column.isGenerated) {
+        type = new ast.IntAst();
+    } else if (column.isObjectId) {
+        type = new ast.IdAst();
+    } else {
+        const name = createName(column)
+        type = createTypeByName(name)
+    }
+    return type;
+}
+
+function createRelationType(column: RelationMetadata) {
+    const name = createName(column)
+    return createTypeByName(name)
+}
+
+function createTypeByName(name: string) {
+    switch (name) {
+        case 'String':
+        case 'varchar':
+            return new ast.StringAst();
+        case 'Number':
+            return new ast.IntAst();
+        case 'Float':
+            return new ast.FloatAst();
+        case 'Boolean':
+            return new ast.BooleanAst();
+        default:
+            if (name.length > 0) {
+                return new ast.UseAst(name)
+            } else {
+                return new ast.EmptyAst(`empty`)
+            }
     }
 }

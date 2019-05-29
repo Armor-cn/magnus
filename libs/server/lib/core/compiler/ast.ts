@@ -1,14 +1,33 @@
 export abstract class Ast {
     abstract visit(visitor: AstVisitor, context: any): any;
 }
+export class ProgressAst extends Ast {
+    scalars: ScalarAst[] = [];
+    enums: EnumAst[] = [];
+    type: Map<string, TypeAst> = new Map();
+    input: Map<string, TypeAst> = new Map();
+    docs: DocumentAst[] = [];
+    visit(visitor: AstVisitor, context: any) {
+        return visitor.visitProgressAst(this, context);
+    }
+}
 export class DocumentAst extends Ast {
     mutation: MutationAst;
     query: QueryAst;
     subscription: SubscriptionAst;
-    scalars: ScalarAst[] = [];
-    enums: EnumAst[] = [];
+    constructor() {
+        super();
+    }
     visit(visitor: AstVisitor, context: any) {
         return visitor.visitDocumentAst(this, context);
+    }
+}
+export class EmptyAst extends Ast {
+    constructor(name: string) {
+        super();
+    }
+    visit(visitor: AstVisitor, context: any) {
+        return visitor.visitEmptyAst(this, context);
     }
 }
 export class SubscriptionAst extends Ast {
@@ -177,7 +196,7 @@ export class UseAst extends Ast {
 }
 export class TypeAst extends Ast {
     name: string;
-    properties: (PropertyAst | MethodAst)[] = [];
+    properties: (PropertyAst | MethodAst | EmptyAst)[] = [];
     father: AstType;
     constructor(name: string, father?: AstType) {
         super();
@@ -211,4 +230,31 @@ export interface AstVisitor<T = any> {
     visitArrayAst(ast: ArrayAst, context: T): any;
     visitDocumentAst(ast: DocumentAst, context: T): any;
     visitDateAst(ast: DateAst, context: T): any;
+    visitProgressAst(ast: ProgressAst, context: T): any;
+    visitEmptyAst(ast: EmptyAst, context: T): any;
+}
+
+export class NullAstVisitor<T = any> implements AstVisitor<T> {
+    visitUseAst(ast: UseAst, context: T): any { }
+    visitObjectLiteralAst(ast: ObjectLiteralAst, context: T): any { }
+    visitTypeAst(ast: TypeAst, context: T): any { }
+    visitParameterAst(ast: ParameterAst, context: T): any { }
+    visitQueryAst(ast: QueryAst, context: T): any { }
+    visitMutationAst(ast: MutationAst, context: T): any { }
+    visitSubscriptionAst(ast: SubscriptionAst, context: T): any { }
+    visitInputAst(ast: InputAst, context: T): any { }
+    visitEnumAst(ast: EnumAst, context: T): any { }
+    visitIdAst(ast: IdAst, context: T): any { }
+    visitBooleanAst(ast: BooleanAst, context: T): any { }
+    visitFloatAst(ast: FloatAst, context: T): any { }
+    visitIntAst(ast: IntAst, context: T): any { }
+    visitStringAst(ast: StringAst, context: T): any { }
+    visitScalarAst(ast: ScalarAst, context: T): any { }
+    visitMethodAst(ast: MethodAst, context: T): any { }
+    visitPropertyAst(ast: PropertyAst, context: T): any { }
+    visitArrayAst(ast: ArrayAst, context: T): any { }
+    visitDocumentAst(ast: DocumentAst, context: T): any { }
+    visitDateAst(ast: DateAst, context: T): any { }
+    visitProgressAst(ast: ProgressAst, context: T): any { }
+    visitEmptyAst(ast: EmptyAst, context: T) { }
 }

@@ -24,9 +24,38 @@ __decorate([
     typeorm_1.Column(),
     __metadata("design:type", String)
 ], User.prototype, "title", void 0);
+__decorate([
+    typeorm_1.OneToMany(() => Post, post => post.user),
+    __metadata("design:type", Array)
+], User.prototype, "posts", void 0);
 User = __decorate([
     typeorm_1.Entity({
         name: 'user'
     })
 ], User);
 exports.User = User;
+let Post = class Post {
+};
+__decorate([
+    typeorm_1.PrimaryGeneratedColumn(),
+    __metadata("design:type", Number)
+], Post.prototype, "id", void 0);
+__decorate([
+    typeorm_1.PrimaryColumn(),
+    __metadata("design:type", String)
+], Post.prototype, "key", void 0);
+__decorate([
+    typeorm_1.Column(),
+    __metadata("design:type", String)
+], Post.prototype, "title", void 0);
+__decorate([
+    typeorm_1.ManyToOne(() => User, user => user.posts),
+    typeorm_1.JoinColumn(),
+    __metadata("design:type", User)
+], Post.prototype, "user", void 0);
+Post = __decorate([
+    typeorm_1.Entity({
+        name: 'post'
+    })
+], Post);
+exports.Post = Post;

@@ -1,7 +1,8 @@
 import * as ast from './ast';
 export declare class ParseVisitor implements ast.AstVisitor {
-    type: Map<string, ast.TypeAst>;
-    input: Map<string, ast.TypeAst>;
+    progress: ast.ProgressAst;
+    visitEmptyAst(item: ast.ProgressAst, context: any): string;
+    visitProgressAst(item: ast.ProgressAst, context: any): string;
     visitMethodAst(ast: ast.MethodAst, context: 'input' | 'output'): string;
     visitParameterAst(ast: ast.ParameterAst, context: 'input' | 'type'): string;
     visitInputAst(ast: ast.InputAst, context: any): any;
@@ -21,5 +22,5 @@ export declare class ParseVisitor implements ast.AstVisitor {
     visitArrayAst(item: ast.ArrayAst, context: 'input' | 'output'): any;
     visitObjectLiteralAst(item: ast.ObjectLiteralAst, context: any): string;
     visitDateAst(): string;
-    visitDocumentAst(ast: ast.DocumentAst, context: any): any;
+    visitDocumentAst(ast: ast.DocumentAst, context: ast.ProgressAst): any;
 }

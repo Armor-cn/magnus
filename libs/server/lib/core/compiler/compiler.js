@@ -11,13 +11,33 @@ const ast = __importStar(require("./ast"));
 class Compiler {
     constructor(meta) {
         this.meta = meta;
-        this.document = new ast.DocumentAst();
+        this.progress = new ast.ProgressAst();
         const visitor = new CompilerVisitor();
-        this.document.visit(visitor, meta);
+        this.progress.visit(visitor, meta);
     }
 }
 exports.Compiler = Compiler;
 class CompilerVisitor {
+    visitProgressAst(item, context) {
+        const metas = context;
+        item.scalars.push(new ast.ScalarAst(`ObjectLiteral`));
+        item.scalars.push(new ast.ScalarAst(`Date`));
+        item.enums.push(new ast.EnumAst(`MutationType`, [
+            'CREATED',
+            'UPDATED',
+            'DELETED'
+        ]));
+        item.enums.push(new ast.EnumAst(`OrderType`, [
+            'ASC',
+            'DESC'
+        ]));
+        metas.map(meta => {
+            const doc = new ast.DocumentAst();
+            item.docs.push(doc.visit(this, meta));
+        });
+        this.progress = item;
+        return item;
+    }
     visitDateAst(item, context) {
         return item;
     }
@@ -76,28 +96,9 @@ class CompilerVisitor {
             case `${context.name}FindConditions`:
                 item.properties = [
                     ...context.columns.map(column => {
-                        let name = ``;
-                        if (typeof column.type === 'string') {
-                            name = column.type;
-                        }
-                        else {
-                            name = column.type.name;
-                        }
-                        let type;
-                        if (column.isCreateDate) {
-                            type = new ast.DateAst();
-                        }
-                        else if (column.isUpdateDate) {
-                            type = new ast.DateAst();
-                        }
-                        else if (column.isGenerated) {
-                            type = new ast.IntAst();
-                        }
-                        else if (column.isObjectId) {
-                            type = new ast.IdAst();
-                        }
-                        else {
-                            type = this.createTypeByName(name);
+                        const type = createType(column);
+                        if (column.isVirtual) {
+                            return new ast.EmptyAst(``);
                         }
                         return new ast.PropertyAst(column.propertyName, type, false);
                     })
@@ -150,34 +151,21 @@ class CompilerVisitor {
             case `${context.name}Input`:
                 item.properties = [
                     ...context.columns.map(column => {
-                        let name = ``;
-                        let required = false;
-                        if (typeof column.type === 'string') {
-                            name = column.type;
-                        }
-                        else {
-                            name = column.type.name;
-                        }
-                        let type;
-                        if (column.isCreateDate) {
-                            type = new ast.DateAst();
-                        }
-                        else if (column.isUpdateDate) {
-                            type = new ast.DateAst();
-                        }
-                        else if (column.isGenerated) {
-                            type = new ast.IntAst();
-                        }
-                        else if (column.isObjectId) {
-                            type = new ast.IdAst();
-                        }
-                        else {
-                            if (!column.isNullable) {
-                                required = true;
-                            }
-                            type = this.createTypeByName(name);
+                        const required = checkRequired(column);
+                        const type = createType(column);
+                        if (column.isVirtual) {
+                            return new ast.EmptyAst(``);
                         }
                         return new ast.PropertyAst(column.propertyName, type, required);
+                    }),
+                    ...context.relations.map(column => {
+                        const type = createRelationType(column);
+                        if (column.isOneToMany || column.isManyToMany) {
+                            return new ast.PropertyAst(column.propertyName, new ast.ArrayAst(type, true), false);
+                        }
+                        else {
+                            return new ast.PropertyAst(column.propertyName, type, true);
+                        }
                     })
                 ];
                 break;
@@ -247,6 +235,9 @@ class CompilerVisitor {
             case `${context.name}Order`:
                 item.properties = [
                     ...context.columns.map(column => {
+                        if (column.isVirtual) {
+                            return new ast.EmptyAst(``);
+                        }
                         return new ast.PropertyAst(column.propertyName, new ast.UseAst(`OrderType`), false);
                     })
                 ];
@@ -265,22 +256,6 @@ class CompilerVisitor {
                 break;
         }
         return item;
-    }
-    createTypeByName(name) {
-        switch (name) {
-            case 'String':
-            case 'varchar':
-                return new ast.StringAst();
-            case 'Number':
-                return new ast.IntAst();
-            case 'Float':
-                return new ast.FloatAst();
-            case 'Boolean':
-                return new ast.BooleanAst();
-            default:
-                debugger;
-                return new ast.TypeAst(name);
-        }
     }
     visitParameterAst(item, context) {
         return item;
@@ -439,19 +414,83 @@ class CompilerVisitor {
         item.mutation = new ast.MutationAst().visit(this, context);
         item.query = new ast.QueryAst().visit(this, context);
         item.subscription = new ast.SubscriptionAst().visit(this, context);
-        item.scalars.push(new ast.ScalarAst(`ObjectLiteral`));
-        item.scalars.push(new ast.ScalarAst(`Date`));
-        item.enums.push(new ast.EnumAst(`MutationType`, [
-            'CREATED',
-            'UPDATED',
-            'DELETED'
-        ]));
-        item.enums.push(new ast.EnumAst(`OrderType`, [
-            'ASC',
-            'DESC'
-        ]));
-        this.document = item;
+        return item;
+    }
+    visitEmptyAst(item, context) {
         return item;
     }
 }
 exports.CompilerVisitor = CompilerVisitor;
+function checkRelationRequired(column) {
+    let required = false;
+    // 如果可以不是null
+    if (!column.isNullable) {
+        required = true;
+    }
+    return required;
+}
+function checkRequired(column) {
+    let required = false;
+    // 如果可以不是null
+    if (!column.isNullable) {
+        if (!column.default) {
+            required = false;
+        }
+        required = true;
+    }
+    return required;
+}
+function createName(column) {
+    let name = ``;
+    if (typeof column.type === 'string') {
+        name = column.type;
+    }
+    else {
+        name = column.type.name;
+    }
+    return name;
+}
+function createType(column) {
+    let type;
+    if (column.isCreateDate) {
+        type = new ast.DateAst();
+    }
+    else if (column.isUpdateDate) {
+        type = new ast.DateAst();
+    }
+    else if (column.isGenerated) {
+        type = new ast.IntAst();
+    }
+    else if (column.isObjectId) {
+        type = new ast.IdAst();
+    }
+    else {
+        const name = createName(column);
+        type = createTypeByName(name);
+    }
+    return type;
+}
+function createRelationType(column) {
+    const name = createName(column);
+    return createTypeByName(name);
+}
+function createTypeByName(name) {
+    switch (name) {
+        case 'String':
+        case 'varchar':
+            return new ast.StringAst();
+        case 'Number':
+            return new ast.IntAst();
+        case 'Float':
+            return new ast.FloatAst();
+        case 'Boolean':
+            return new ast.BooleanAst();
+        default:
+            if (name.length > 0) {
+                return new ast.UseAst(name);
+            }
+            else {
+                return new ast.EmptyAst(`empty`);
+            }
+    }
+}

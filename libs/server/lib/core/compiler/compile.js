@@ -9,12 +9,10 @@ function compile(connection) {
     const metadatas = connection.entityMetadatas;
     const visitor = new parse_1.ParseVisitor();
     const nodes = [];
-    metadatas.map(meta => {
-        const compiler = new compiler_1.Compiler(meta);
-        const code = compiler.document.visit(visitor, meta);
-        fs_extra_1.writeFileSync(path_1.join(__dirname, `${meta.name}.graphql`), code);
-        nodes.push(apollo_server_1.gql `${code}`);
-    });
+    const compiler = new compiler_1.Compiler(metadatas);
+    const code = compiler.progress.visit(visitor, metadatas);
+    fs_extra_1.writeFileSync(path_1.join(__dirname, `main.graphql`), code);
+    nodes.push(apollo_server_1.gql `${code}`);
     return nodes;
 }
 exports.compile = compile;

@@ -11,7 +11,8 @@ async function bootstrap() {
         database: 'prisma',
         port: 5432,
         entities: [
-            user_entity_1.User
+            user_entity_1.User,
+            user_entity_1.Post
         ],
         synchronize: true
     });

@@ -9,9 +9,44 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const ast = __importStar(require("./ast"));
 class ParseVisitor {
-    constructor() {
-        this.type = new Map();
-        this.input = new Map();
+    visitEmptyAst(item, context) {
+        return ``;
+    }
+    visitProgressAst(item, context) {
+        this.progress = item;
+        const scalars = item.scalars.map(scalar => scalar.visit(this, context)).join(`\n`);
+        const enu = item.enums.map(enu => enu.visit(this, context)).join(`\n`);
+        let mutation = ``, query = ``, subscription = ``;
+        item.docs.map(doc => {
+            mutation += doc.mutation.visit(this, item);
+            query += doc.query.visit(this, item);
+            subscription += doc.subscription.visit(this, item);
+        });
+        let inputString = ``;
+        item.input.forEach((input) => {
+            inputString += `input ${input.name} `;
+            inputString += `{\n\t${input.properties.map(pro => pro.visit(this, `input`)).join(`\n\t`)}\n}\n`;
+        });
+        let typeString = ``;
+        item.type.forEach((input, key) => {
+            typeString += `type ${key} `;
+            typeString += `{\n\t${input.properties.map(pro => pro.visit(this, `output`)).join(`\n\t`)}\n}\n`;
+        });
+        return `
+${scalars}
+${enu}
+${inputString}
+${typeString}
+type Query {
+${query}
+}
+type Subscription {
+${subscription} 
+}
+type Mutation {
+${mutation} 
+}
+`;
     }
     visitMethodAst(ast, context) {
         return `${ast.name}(${ast.parameters.map(par => par.visit(this, 'input')).join(', ')}): ${ast.returnType.visit(this, 'output')}${ast.requiredReturn ? `!` : ``}`;
@@ -28,38 +63,38 @@ class ParseVisitor {
             case 'input':
                 // 如果是Input,如果属性不是Input需要转换成input
                 ast.properties.map(pro => pro.visit(this, 'input'));
-                if (this.type.has(ast.name)) {
+                if (this.progress.type.has(ast.name)) {
                     // 如果type里有了
                     const name = ast.name + `Input`;
-                    this.input.set(name, ast);
+                    this.progress.input.set(name, ast);
                     return name;
                 }
                 else {
-                    this.input.set(ast.name, ast);
+                    this.progress.input.set(ast.name, ast);
                     return ast.name;
                 }
             default:
                 // output
                 ast.properties.map(pro => pro.visit(this, context));
-                if (this.input.has(ast.name)) {
+                if (this.progress.input.has(ast.name)) {
                     const name = ast.name + `Output`;
-                    this.type.set(name, ast);
+                    this.progress.type.set(name, ast);
                     return name;
                 }
                 else {
-                    this.type.set(ast.name, ast);
+                    this.progress.type.set(ast.name, ast);
                     return ast.name;
                 }
         }
     }
     visitQueryAst(ast, context) {
-        return `type Query {\n\t${ast.properties.map(method => method.visit(this, 'output')).join(`\n\t`)}\n}\n`;
+        return `\t${ast.properties.map(method => method.visit(this, 'output')).join(`\n\t`)}\n`;
     }
     visitMutationAst(ast, context) {
-        return `type Mutation {\n\t${ast.properties.map(method => method.visit(this, 'output')).join(`\n\t`)}\n}\n`;
+        return `\t${ast.properties.map(method => method.visit(this, 'output')).join(`\n\t`)}\n`;
     }
     visitSubscriptionAst(ast, context) {
-        return `type Subscription {\n\t${ast.properties.map(method => method.visit(this, 'output')).join(`\n\t`)}\n}\n`;
+        return `\t${ast.properties.map(method => method.visit(this, 'output')).join(`\n\t`)}\n`;
     }
     visitEnumAst(ast, context) {
         return `enum ${ast.name} {\n\t${ast.properties.join(`\n\t`)}\n}\n`;
@@ -88,22 +123,22 @@ class ParseVisitor {
     visitPropertyAst(item, context) {
         if (item.type instanceof ast.UseAst) {
             if (context === 'input') {
-                if (!this.input.has(item.type.name)) {
-                    if (this.type.has(item.type.name)) {
-                        const ast = this.type.get(item.type.name);
+                if (!this.progress.input.has(item.type.name)) {
+                    if (this.progress.type.has(item.type.name)) {
+                        const ast = this.progress.type.get(item.type.name);
                         if (ast) {
-                            this.input.set(ast.name + 'Input', ast);
+                            this.progress.input.set(ast.name + 'Input', ast);
                             item.type.name = ast.name + 'Input';
                         }
                     }
                 }
             }
             else {
-                if (!this.type.has(item.type.name)) {
-                    if (this.input.has(item.type.name)) {
-                        const ast = this.input.get(item.type.name);
+                if (!this.progress.type.has(item.type.name)) {
+                    if (this.progress.input.has(item.type.name)) {
+                        const ast = this.progress.input.get(item.type.name);
                         if (ast) {
-                            this.type.set(ast.name + 'Output', ast);
+                            this.progress.type.set(ast.name + 'Output', ast);
                             item.type.name = ast.name + 'Output';
                         }
                     }
@@ -115,22 +150,22 @@ class ParseVisitor {
     visitArrayAst(item, context) {
         if (item.type instanceof ast.UseAst) {
             if (context === 'input') {
-                if (!this.input.has(item.type.name)) {
-                    if (this.type.has(item.type.name)) {
-                        const ast = this.type.get(item.type.name);
+                if (!this.progress.input.has(item.type.name)) {
+                    if (this.progress.type.has(item.type.name)) {
+                        const ast = this.progress.type.get(item.type.name);
                         if (ast) {
-                            this.input.set(ast.name + 'Input', ast);
+                            this.progress.input.set(ast.name + 'Input', ast);
                             item.type.name = ast.name + 'Input';
                         }
                     }
                 }
             }
             else {
-                if (!this.type.has(item.type.name)) {
-                    if (this.input.has(item.type.name)) {
-                        const ast = this.input.get(item.type.name);
+                if (!this.progress.type.has(item.type.name)) {
+                    if (this.progress.input.has(item.type.name)) {
+                        const ast = this.progress.input.get(item.type.name);
                         if (ast) {
-                            this.type.set(ast.name + 'Output', ast);
+                            this.progress.type.set(ast.name + 'Output', ast);
                             item.type.name = ast.name + 'Output';
                         }
                     }
@@ -146,30 +181,7 @@ class ParseVisitor {
         return `Date`;
     }
     visitDocumentAst(ast, context) {
-        const mutation = ast.mutation.visit(this, context);
-        const query = ast.query.visit(this, context);
-        const subscription = ast.subscription.visit(this, context);
-        const scalars = ast.scalars.map(scalar => scalar.visit(this, context)).join(`\n`);
-        const enu = ast.enums.map(enu => enu.visit(this, context)).join(`\n`);
-        let inputString = ``;
-        this.input.forEach((input) => {
-            inputString += `input ${input.name} `;
-            inputString += `{\n\t${input.properties.map(pro => pro.visit(this, `input`)).join(`\n\t`)}\n}\n`;
-        });
-        let typeString = ``;
-        this.type.forEach((input, key) => {
-            typeString += `type ${key} `;
-            typeString += `{\n\t${input.properties.map(pro => pro.visit(this, `output`)).join(`\n\t`)}\n}\n`;
-        });
-        return `
-${scalars}
-${enu}
-${inputString}
-${typeString}
-${query}
-${mutation}
-${subscription}
-`;
+        return ``;
     }
 }
 exports.ParseVisitor = ParseVisitor;

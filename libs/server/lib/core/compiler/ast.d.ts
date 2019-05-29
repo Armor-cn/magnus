@@ -1,12 +1,23 @@
 export declare abstract class Ast {
     abstract visit(visitor: AstVisitor, context: any): any;
 }
+export declare class ProgressAst extends Ast {
+    scalars: ScalarAst[];
+    enums: EnumAst[];
+    type: Map<string, TypeAst>;
+    input: Map<string, TypeAst>;
+    docs: DocumentAst[];
+    visit(visitor: AstVisitor, context: any): any;
+}
 export declare class DocumentAst extends Ast {
     mutation: MutationAst;
     query: QueryAst;
     subscription: SubscriptionAst;
-    scalars: ScalarAst[];
-    enums: EnumAst[];
+    constructor();
+    visit(visitor: AstVisitor, context: any): any;
+}
+export declare class EmptyAst extends Ast {
+    constructor(name: string);
     visit(visitor: AstVisitor, context: any): any;
 }
 export declare class SubscriptionAst extends Ast {
@@ -99,7 +110,7 @@ export declare class UseAst extends Ast {
 }
 export declare class TypeAst extends Ast {
     name: string;
-    properties: (PropertyAst | MethodAst)[];
+    properties: (PropertyAst | MethodAst | EmptyAst)[];
     father: AstType;
     constructor(name: string, father?: AstType);
     visit(visitor: AstVisitor, context: any): any;
@@ -125,4 +136,30 @@ export interface AstVisitor<T = any> {
     visitArrayAst(ast: ArrayAst, context: T): any;
     visitDocumentAst(ast: DocumentAst, context: T): any;
     visitDateAst(ast: DateAst, context: T): any;
+    visitProgressAst(ast: ProgressAst, context: T): any;
+    visitEmptyAst(ast: EmptyAst, context: T): any;
+}
+export declare class NullAstVisitor<T = any> implements AstVisitor<T> {
+    visitUseAst(ast: UseAst, context: T): any;
+    visitObjectLiteralAst(ast: ObjectLiteralAst, context: T): any;
+    visitTypeAst(ast: TypeAst, context: T): any;
+    visitParameterAst(ast: ParameterAst, context: T): any;
+    visitQueryAst(ast: QueryAst, context: T): any;
+    visitMutationAst(ast: MutationAst, context: T): any;
+    visitSubscriptionAst(ast: SubscriptionAst, context: T): any;
+    visitInputAst(ast: InputAst, context: T): any;
+    visitEnumAst(ast: EnumAst, context: T): any;
+    visitIdAst(ast: IdAst, context: T): any;
+    visitBooleanAst(ast: BooleanAst, context: T): any;
+    visitFloatAst(ast: FloatAst, context: T): any;
+    visitIntAst(ast: IntAst, context: T): any;
+    visitStringAst(ast: StringAst, context: T): any;
+    visitScalarAst(ast: ScalarAst, context: T): any;
+    visitMethodAst(ast: MethodAst, context: T): any;
+    visitPropertyAst(ast: PropertyAst, context: T): any;
+    visitArrayAst(ast: ArrayAst, context: T): any;
+    visitDocumentAst(ast: DocumentAst, context: T): any;
+    visitDateAst(ast: DateAst, context: T): any;
+    visitProgressAst(ast: ProgressAst, context: T): any;
+    visitEmptyAst(ast: EmptyAst, context: T): void;
 }

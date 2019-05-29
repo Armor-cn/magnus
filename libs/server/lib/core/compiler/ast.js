@@ -3,17 +3,38 @@ Object.defineProperty(exports, "__esModule", { value: true });
 class Ast {
 }
 exports.Ast = Ast;
-class DocumentAst extends Ast {
+class ProgressAst extends Ast {
     constructor() {
         super(...arguments);
         this.scalars = [];
         this.enums = [];
+        this.type = new Map();
+        this.input = new Map();
+        this.docs = [];
+    }
+    visit(visitor, context) {
+        return visitor.visitProgressAst(this, context);
+    }
+}
+exports.ProgressAst = ProgressAst;
+class DocumentAst extends Ast {
+    constructor() {
+        super();
     }
     visit(visitor, context) {
         return visitor.visitDocumentAst(this, context);
     }
 }
 exports.DocumentAst = DocumentAst;
+class EmptyAst extends Ast {
+    constructor(name) {
+        super();
+    }
+    visit(visitor, context) {
+        return visitor.visitEmptyAst(this, context);
+    }
+}
+exports.EmptyAst = EmptyAst;
 class SubscriptionAst extends Ast {
     constructor() {
         super(...arguments);
@@ -194,3 +215,28 @@ class TypeAst extends Ast {
     }
 }
 exports.TypeAst = TypeAst;
+class NullAstVisitor {
+    visitUseAst(ast, context) { }
+    visitObjectLiteralAst(ast, context) { }
+    visitTypeAst(ast, context) { }
+    visitParameterAst(ast, context) { }
+    visitQueryAst(ast, context) { }
+    visitMutationAst(ast, context) { }
+    visitSubscriptionAst(ast, context) { }
+    visitInputAst(ast, context) { }
+    visitEnumAst(ast, context) { }
+    visitIdAst(ast, context) { }
+    visitBooleanAst(ast, context) { }
+    visitFloatAst(ast, context) { }
+    visitIntAst(ast, context) { }
+    visitStringAst(ast, context) { }
+    visitScalarAst(ast, context) { }
+    visitMethodAst(ast, context) { }
+    visitPropertyAst(ast, context) { }
+    visitArrayAst(ast, context) { }
+    visitDocumentAst(ast, context) { }
+    visitDateAst(ast, context) { }
+    visitProgressAst(ast, context) { }
+    visitEmptyAst(ast, context) { }
+}
+exports.NullAstVisitor = NullAstVisitor;

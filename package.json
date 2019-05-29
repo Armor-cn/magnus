@@ -4,7 +4,7 @@
 	"description": "> dota2 半人猛犸， 干掉prisma",
 	"main": "index.js",
 	"scripts": {
-		"b": "./node_modules/.bin/tsc -p tsconfig.json"
+		"tsc": "./node_modules/.bin/tsc -p tsconfig.json -w"
 	},
 	"repository": {
 		"type": "git",

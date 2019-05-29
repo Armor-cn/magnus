@@ -1,16 +1,16 @@
 import { EntityMetadata } from 'typeorm';
 import * as ast from './ast';
-export declare class Compiler<T> {
-    meta: EntityMetadata;
-    document: ast.DocumentAst;
-    constructor(meta: EntityMetadata);
+export declare class Compiler {
+    meta: EntityMetadata[];
+    progress: ast.ProgressAst;
+    constructor(meta: EntityMetadata[]);
 }
 export declare class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
-    document: ast.DocumentAst;
+    progress: ast.ProgressAst;
+    visitProgressAst(item: ast.ProgressAst, context: any): any;
     visitDateAst(item: ast.TypeAst, context: EntityMetadata): ast.TypeAst;
     visitObjectLiteralAst(item: ast.ObjectLiteralAst, context: EntityMetadata): ast.ObjectLiteralAst;
     visitTypeAst(item: ast.TypeAst, context: EntityMetadata): ast.TypeAst;
-    createTypeByName(name: string): ast.BooleanAst | ast.FloatAst | ast.IntAst | ast.StringAst | ast.TypeAst;
     visitParameterAst(item: ast.ParameterAst, context: EntityMetadata): ast.ParameterAst;
     visitMethodAst(item: ast.MethodAst, context: EntityMetadata): ast.MethodAst;
     /**
@@ -46,4 +46,5 @@ export declare class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
     visitScalarAst(item: ast.ScalarAst, context: EntityMetadata): any;
     visitPropertyAst(item: ast.PropertyAst, context: EntityMetadata): any;
     visitDocumentAst(item: ast.DocumentAst, context: EntityMetadata): any;
+    visitEmptyAst(item: ast.EmptyAst, context: EntityMetadata): ast.EmptyAst;
 }

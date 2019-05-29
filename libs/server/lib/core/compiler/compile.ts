@@ -9,11 +9,9 @@ export function compile(connection: Connection): DocumentNode[] {
     const metadatas = connection.entityMetadatas;
     const visitor = new ParseVisitor();
     const nodes: DocumentNode[] = [];
-    metadatas.map(meta => {
-        const compiler = new Compiler(meta);
-        const code = compiler.document.visit(visitor, meta);
-        writeFileSync(join(__dirname, `${meta.name}.graphql`), code)
-        nodes.push(gql`${code}`);
-    });
+    const compiler = new Compiler(metadatas);
+    const code = compiler.progress.visit(visitor, metadatas);
+    writeFileSync(join(__dirname, `main.graphql`), code)
+    nodes.push(gql`${code}`);
     return nodes;
 }

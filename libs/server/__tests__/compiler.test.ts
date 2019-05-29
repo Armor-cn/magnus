@@ -1,6 +1,6 @@
 import { compile } from '../lib/core/compiler/compile';
 import { createConnection } from 'typeorm';
-import { User } from './entities/user.entity';
+import { User, Post } from './entities/user.entity';
 async function bootstrap() {
     const connection = await createConnection({
         type: 'postgres',
@@ -10,7 +10,8 @@ async function bootstrap() {
         database: 'prisma',
         port: 5432,
         entities: [
-            User
+            User,
+            Post
         ]
     });
     const nodes = compile(connection);
