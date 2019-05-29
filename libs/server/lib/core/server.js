@@ -24,11 +24,10 @@ class CoreServer {
                 this.resolver.push(new resolver_1.Resolver(res, meta.name));
             }
         });
+        const resolvers = this.createResolvers();
         const config = {
             typeDefs: compile_1.compile(this._connection, this._options.entities),
-            resolvers: {
-                ...this.createResolvers()
-            },
+            resolvers,
             playground: true,
         };
         this._server = new apollo_server_express_1.ApolloServer(config);
@@ -37,13 +36,11 @@ class CoreServer {
     createMutation() {
         const options = {};
         this.resolver.map(res => {
-            options[`${res.name}`] = (...args) => {
-                const query = res.getMutation();
-                options[`${res.name}`] = () => query;
-                Object.keys(query).map(key => {
-                    options[`${lodash_1.lowerFirst(res.name)}${lodash_1.upperFirst(key)}`] = query[`${key}`];
-                });
-            };
+            const mutation = res.getMutation();
+            options[`${res.name}`] = () => mutation;
+            Object.keys(mutation).map(key => {
+                options[`${lodash_1.lowerFirst(res.name)}${lodash_1.upperFirst(key)}`] = mutation[`${key}`];
+            });
         });
         return options;
     }
@@ -51,7 +48,7 @@ class CoreServer {
         const options = {};
         this.resolver.map(res => {
             const query = res.getQuery();
-            options[`${res.name}`] = () => query;
+            options[`${res.name}`] = query;
             Object.keys(query).map(key => {
                 options[`${lodash_1.lowerFirst(res.name)}${lodash_1.upperFirst(key)}`] = query[`${key}`];
             });
@@ -73,6 +70,7 @@ class CoreServer {
         return {
             Query: this.createQuery(),
             Mutation: this.createMutation(),
+            Subscription: this.createSubscription(),
             ObjectLiteral: new graphql_1.GraphQLScalarType({
                 name: 'ObjectLiteral',
                 parseValue(value) {

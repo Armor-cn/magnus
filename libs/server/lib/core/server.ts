@@ -25,11 +25,10 @@ export class CoreServer {
                 this.resolver.push(new Resolver(res, meta.name))
             }
         });
+        const resolvers = this.createResolvers();
         const config = {
             typeDefs: compile(this._connection, this._options.entities as any),
-            resolvers: {
-                ...this.createResolvers()
-            },
+            resolvers,
             playground: true,
         };
         this._server = new ApolloServer(config);
@@ -39,13 +38,11 @@ export class CoreServer {
     createMutation() {
         const options: any = {};
         this.resolver.map(res => {
-            options[`${res.name}`] = (...args: any[]) => {
-                const query: any = res.getMutation();
-                options[`${res.name}`] = () => query;
-                Object.keys(query).map(key => {
-                    options[`${lowerFirst(res.name)}${upperFirst(key)}`] = query[`${key}`];
-                });
-            }
+            const mutation: any = res.getMutation();
+            options[`${res.name}`] = () => mutation;
+            Object.keys(mutation).map(key => {
+                options[`${lowerFirst(res.name)}${upperFirst(key)}`] = mutation[`${key}`];
+            });
         });
         return options;
     }
@@ -53,7 +50,7 @@ export class CoreServer {
         const options: any = {};
         this.resolver.map(res => {
             const query: any = res.getQuery();
-            options[`${res.name}`] = () => query;
+            options[`${res.name}`] = query;
             Object.keys(query).map(key => {
                 options[`${lowerFirst(res.name)}${upperFirst(key)}`] = query[`${key}`];
             });
@@ -75,6 +72,7 @@ export class CoreServer {
         return {
             Query: this.createQuery(),
             Mutation: this.createMutation(),
+            Subscription: this.createSubscription(),
             ObjectLiteral: new GraphQLScalarType({
                 name: 'ObjectLiteral',
                 parseValue(value: string) {
