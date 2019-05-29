@@ -64,7 +64,8 @@
   },
   "include": [
     "libs",
-    "demos"
+    "demos",
+    "tools"
   ],
   "exclude": [
     "node_modules"

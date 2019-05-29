@@ -1,4 +1,4 @@
-import { createConnection, Connection, ConnectionOptions, ObjectType } from 'typeorm';
+import { createConnection, Connection, ConnectionOptions, EntityMetadata } from 'typeorm';
 import { ApolloServer } from 'apollo-server-express';
 import { GraphQLScalarType } from 'graphql';
 import { Kind } from 'graphql/language';
@@ -20,9 +20,9 @@ export class CoreServer {
         const entities = this._options.entities || [];
         entities.map(entity => {
             if (this._connection) {
-                const meta = this._connection.getMetadata(entity);
+                const meta: EntityMetadata = this._connection.getMetadata(entity);
                 const res = this._connection.getRepository(meta.target)
-                this.resolver.push(new Resolver(res, meta.name))
+                this.resolver.push(new Resolver(res, meta, this._connection))
             }
         });
         const resolvers = this.createResolvers();
@@ -39,9 +39,9 @@ export class CoreServer {
         const options: any = {};
         this.resolver.map(res => {
             const mutation: any = res.getMutation();
-            options[`${res.name}`] = () => mutation;
+            options[`${res.meta.name}`] = () => mutation;
             Object.keys(mutation).map(key => {
-                options[`${lowerFirst(res.name)}${upperFirst(key)}`] = mutation[`${key}`];
+                options[`${lowerFirst(res.meta.name)}${upperFirst(key)}`] = mutation[`${key}`];
             });
         });
         return options;
@@ -50,9 +50,9 @@ export class CoreServer {
         const options: any = {};
         this.resolver.map(res => {
             const query: any = res.getQuery();
-            options[`${res.name}`] = query;
+            options[`${res.meta.name}`] = query;
             Object.keys(query).map(key => {
-                options[`${lowerFirst(res.name)}${upperFirst(key)}`] = query[`${key}`];
+                options[`${lowerFirst(res.meta.name)}${upperFirst(key)}`] = query[`${key}`];
             });
         });
         return options;
@@ -61,9 +61,9 @@ export class CoreServer {
         const options: any = {};
         this.resolver.map(res => {
             const query: any = res.getSubscribtion();
-            options[`${res.name}`] = () => query;
+            options[`${res.meta.name}`] = () => query;
             Object.keys(query).map(key => {
-                options[`${lowerFirst(res.name)}${upperFirst(key)}`] = query[`${key}`];
+                options[`${lowerFirst(res.meta.name)}${upperFirst(key)}`] = query[`${key}`];
             });
         });
         return options;

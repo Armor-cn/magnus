@@ -309,7 +309,9 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
             case `${context.name}Mutation`:
                 item.properties = [
                     new ast.MethodAst(`save`).visit(this, context),
+                    new ast.MethodAst(`saves`).visit(this, context),
                     new ast.MethodAst(`remove`).visit(this, context),
+                    new ast.MethodAst(`removes`).visit(this, context),
                     new ast.MethodAst(`insert`).visit(this, context),
                     new ast.MethodAst(`update`).visit(this, context),
                     new ast.MethodAst(`delete`).visit(this, context),
@@ -477,6 +479,30 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                     ).visit(this, context)
                 ];
                 break;
+            case 'saves':
+                item.returnType = new ast.ArrayAst(
+                    new ast.TypeAst(`${context.name}`).visit(this, context),
+                    true
+                ).visit(this, context);
+                item.requiredReturn = true;
+                item.parameters = [
+                    new ast.ParameterAst(
+                        0,
+                        `entities`,
+                        new ast.ArrayAst(
+                            new ast.TypeAst(`${context.name}`).visit(this, context),
+                            true
+                        ).visit(this, context),
+                        true
+                    ).visit(this, context),
+                    new ast.ParameterAst(
+                        1,
+                        `options`,
+                        new ast.TypeAst(`SaveOptions`).visit(this, context),
+                        false
+                    ).visit(this, context)
+                ];
+                break;
             case `remove`:
                 item.returnType = new ast.TypeAst(`UpdateResult`).visit(this, context);
                 item.requiredReturn = true;
@@ -484,6 +510,24 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                     new ast.ParameterAst(
                         0,
                         `entity`,
+                        new ast.TypeAst(`${context.name}Input`).visit(this, context),
+                        true
+                    ).visit(this, context),
+                    new ast.ParameterAst(
+                        0,
+                        `option`,
+                        new ast.TypeAst(`RemoveOptions`).visit(this, context),
+                        false
+                    ).visit(this, context)
+                ];
+                break;
+            case `removes`:
+                item.returnType = new ast.ArrayAst(new ast.TypeAst(`${context.name}`), true).visit(this, context);
+                item.requiredReturn = true;
+                item.parameters = [
+                    new ast.ParameterAst(
+                        0,
+                        `entities`,
                         new ast.TypeAst(`${context.name}Input`).visit(this, context),
                         true
                     ).visit(this, context),

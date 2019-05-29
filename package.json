@@ -5,7 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"tsc": "./node_modules/.bin/tsc -p tsconfig.json -w",
-		"ts": "./node_modules/.bin/ts-node"
+		"ts": "./node_modules/.bin/ts-node",
+		"clear": "sh ./clear.sh"
 	},
 	"repository": {
 		"type": "git",
@@ -30,12 +31,14 @@
 		"graphql-tools": "^4.0.4",
 		"lodash": "^4.17.11",
 		"pg": "^7.11.0",
+		"shelljs": "^0.8.3",
 		"typeorm": "^0.2.17"
 	},
 	"devDependencies": {
 		"@types/fs-extra": "^7.0.0",
 		"@types/graphql": "^14.2.0",
 		"@types/node": "^12.0.2",
+		"@types/shelljs": "^0.8.5",
 		"jest": "^24.8.0",
 		"lerna": "^3.14.1",
 		"mocha": "^6.1.4",
