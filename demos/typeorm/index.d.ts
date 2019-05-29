@@ -13,5 +13,5 @@ import { MemberEntity } from './entities/member.entity';
 import { PostEntity } from './entities/post.entity';
 import { PostCategoryEntity } from './entities/postCategory.entity';
 export { AccessTokenEntity, AddonEntity, LoggerEntity, OrganizationEntity, PermissionEntity, RefreshTokenEntity, RoleEntity, UserEntity, ArticleEntity, ArticleCategoryEntity, ArticleCommentEntity, EXPRES_TIME };
-declare const _default: (typeof RoleEntity | typeof PermissionEntity | typeof AccessTokenEntity | typeof AddonEntity | typeof LoggerEntity | typeof OrganizationEntity | typeof RefreshTokenEntity | typeof UserEntity | typeof ArticleEntity | typeof ArticleCategoryEntity | typeof ArticleCommentEntity | typeof MemberEntity | typeof PostEntity | typeof PostCategoryEntity)[];
+declare const _default: (typeof AddonEntity | typeof LoggerEntity | typeof OrganizationEntity | typeof PermissionEntity | typeof RefreshTokenEntity | typeof RoleEntity | typeof UserEntity | typeof AccessTokenEntity | typeof ArticleEntity | typeof ArticleCategoryEntity | typeof ArticleCommentEntity | typeof MemberEntity | typeof PostEntity | typeof PostCategoryEntity)[];
 export default _default;
