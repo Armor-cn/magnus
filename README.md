@@ -1,2 +1,2 @@
 # magnus
-> dota2 半人猛犸，干掉prisma中的反人类设计
+> dota 半人猛犸，干掉prisma中的反人类设计
