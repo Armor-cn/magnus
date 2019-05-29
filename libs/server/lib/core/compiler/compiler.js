@@ -66,10 +66,10 @@ class CompilerVisitor {
                     new ast.PropertyAst(`raw`, new ast.UseAst(`${context.name}`), true)
                 ];
                 break;
-            case `${context.name}UpdateResult`:
+            case `UpdateResult`:
                 item.properties = [
-                    new ast.PropertyAst(`raw`, new ast.UseAst(`${context.name}`), true),
-                    new ast.PropertyAst(`generatedMaps`, new ast.ObjectLiteralAst(), true)
+                    new ast.PropertyAst(`code`, new ast.IntAst(), true),
+                    new ast.PropertyAst(`message`, new ast.StringAst(), true)
                 ];
                 break;
             case `${context.name}DeleteResult`:
@@ -288,11 +288,11 @@ class CompilerVisitor {
                 ];
                 break;
             case `remove`:
-                item.returnType = new ast.TypeAst(`${context.name}`).visit(this, context);
+                item.returnType = new ast.TypeAst(`UpdateResult`).visit(this, context);
                 item.requiredReturn = true;
                 item.parameters = [
                     new ast.ParameterAst(0, `entity`, new ast.TypeAst(`${context.name}Input`).visit(this, context), true).visit(this, context),
-                    new ast.ParameterAst(0, `options`, new ast.TypeAst(`RemoveOptions`).visit(this, context), false).visit(this, context)
+                    new ast.ParameterAst(0, `option`, new ast.TypeAst(`RemoveOptions`).visit(this, context), false).visit(this, context)
                 ];
                 break;
             case `insert`:
@@ -303,7 +303,7 @@ class CompilerVisitor {
                 ];
                 break;
             case `update`:
-                item.returnType = new ast.TypeAst(`${context.name}UpdateResult`).visit(this, context);
+                item.returnType = new ast.TypeAst(`UpdateResult`).visit(this, context);
                 item.requiredReturn = true;
                 item.parameters = [
                     new ast.ParameterAst(0, 'where', new ast.UseAst(`${context.name}FindConditions`), true),

@@ -26,6 +26,11 @@ interface RemovesInput<T> {
     options?: RemoveOptions;
 }
 
+export interface IUpdateResult {
+    code: number;
+    message: string;
+}
+
 export interface MultiResult<T> {
     data: T[];
 }
@@ -126,11 +131,11 @@ export class Resolver<T> {
                     return this.insert(args[0].entity)
                 }
             },
-            update: (...args: Args<{ where: FindConditions<T>, entity: any }>) => {
+            update: (...args: Args<{ where: FindConditions<T>, options: any }>) => {
                 if (isArgsMethod(args)) {
-                    return this.update(args[1].where, args[1].entity)
+                    return this.update(args[1].where, args[1].options)
                 } else {
-                    return this.update(args[0].where, args[0].where)
+                    return this.update(args[0].where, args[0].options)
                 }
             },
             delete: (...args: Args<{ where: FindConditions<T> }>) => {
@@ -164,12 +169,12 @@ export class Resolver<T> {
         const data = await this.repository.save(options.data, options.options);
         return { data };
     }
-    async remove(entity: T, options?: RemoveOptions): Promise<T> {
+    async remove(entity: T, options?: RemoveOptions): Promise<IUpdateResult> {
         const data = await this.repository.remove(entity, options);
         this.pubsub.publish(MutationType.DELETED, {
             watch: { data, action: MutationType.DELETED }
         });
-        return data;
+        return { code: 0, message: 'success' };
     }
     async removes(options: RemovesInput<T>): Promise<MultiResult<T>> {
         const data = await this.repository.remove(options.data, options.options);
@@ -185,12 +190,12 @@ export class Resolver<T> {
     async inserts(options: any[]): Promise<InsertResult> {
         return this.repository.insert(options)
     }
-    async update(where: FindConditions<T>, entity: any): Promise<UpdateResult> {
+    async update(where: FindConditions<T>, entity: any): Promise<IUpdateResult> {
         const data = await this.repository.update(where, entity);
         this.pubsub.publish(MutationType.UPDATED, {
             watch: { data, action: MutationType.UPDATED }
         });
-        return data;
+        return { code: 0, message: 'success' };
     }
     async delete(where: FindConditions<T>): Promise<DeleteResult> {
         const data = await this.repository.delete(where);

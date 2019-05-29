@@ -98,10 +98,10 @@ class Resolver {
             },
             update: (...args) => {
                 if (isArgsMethod(args)) {
-                    return this.update(args[1].where, args[1].entity);
+                    return this.update(args[1].where, args[1].options);
                 }
                 else {
-                    return this.update(args[0].where, args[0].where);
+                    return this.update(args[0].where, args[0].options);
                 }
             },
             delete: (...args) => {
@@ -142,7 +142,7 @@ class Resolver {
         this.pubsub.publish(MutationType.DELETED, {
             watch: { data, action: MutationType.DELETED }
         });
-        return data;
+        return { code: 0, message: 'success' };
     }
     async removes(options) {
         const data = await this.repository.remove(options.data, options.options);
@@ -163,7 +163,7 @@ class Resolver {
         this.pubsub.publish(MutationType.UPDATED, {
             watch: { data, action: MutationType.UPDATED }
         });
-        return data;
+        return { code: 0, message: 'success' };
     }
     async delete(where) {
         const data = await this.repository.delete(where);

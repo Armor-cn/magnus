@@ -1,4 +1,4 @@
-import { Repository, FindManyOptions, FindOneOptions, UpdateResult, DeleteResult, FindConditions, InsertResult, RemoveOptions, SaveOptions } from 'typeorm';
+import { Repository, FindManyOptions, FindOneOptions, DeleteResult, FindConditions, InsertResult, RemoveOptions, SaveOptions } from 'typeorm';
 export declare enum MutationType {
     CREATED = "CREATED",
     UPDATED = "UPDATED",
@@ -23,6 +23,10 @@ export interface RemoveInput<T> {
 interface RemovesInput<T> {
     data: T[];
     options?: RemoveOptions;
+}
+export interface IUpdateResult {
+    code: number;
+    message: string;
 }
 export interface MultiResult<T> {
     data: T[];
@@ -80,14 +84,14 @@ export declare class Resolver<T> {
         remove: (...args: Args<{
             entity: T;
             option?: RemoveOptions | undefined;
-        }>) => Promise<T>;
+        }>) => Promise<IUpdateResult>;
         insert: (...args: Args<{
             entity: T;
         }>) => Promise<InsertResult>;
         update: (...args: Args<{
             where: FindConditions<T>;
-            entity: any;
-        }>) => Promise<UpdateResult>;
+            options: any;
+        }>) => Promise<IUpdateResult>;
         delete: (...args: Args<{
             where: FindConditions<T>;
         }>) => Promise<DeleteResult>;
@@ -99,11 +103,11 @@ export declare class Resolver<T> {
     };
     save(entity: T, options?: SaveOptions): Promise<T>;
     saves(options: SavesInput<T>): Promise<MultiResult<T>>;
-    remove(entity: T, options?: RemoveOptions): Promise<T>;
+    remove(entity: T, options?: RemoveOptions): Promise<IUpdateResult>;
     removes(options: RemovesInput<T>): Promise<MultiResult<T>>;
     insert(entity: any): Promise<InsertResult>;
     inserts(options: any[]): Promise<InsertResult>;
-    update(where: FindConditions<T>, entity: any): Promise<UpdateResult>;
+    update(where: FindConditions<T>, entity: any): Promise<IUpdateResult>;
     delete(where: FindConditions<T>): Promise<DeleteResult>;
     count(options?: FindManyOptions<T>): Promise<CountResultInput>;
     findPage(options?: FindManyOptions<T>): Promise<MultiResult<T>>;

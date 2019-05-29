@@ -86,12 +86,12 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                     )
                 ];
                 break;
-            case `${context.name}UpdateResult`:
+            case `UpdateResult`:
                 item.properties = [
-                    new ast.PropertyAst(`raw`, new ast.UseAst(`${context.name}`), true),
+                    new ast.PropertyAst(`code`, new ast.IntAst(), true),
                     new ast.PropertyAst(
-                        `generatedMaps`,
-                        new ast.ObjectLiteralAst(),
+                        `message`,
+                        new ast.StringAst(),
                         true
                     )
                 ];
@@ -478,7 +478,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                 ];
                 break;
             case `remove`:
-                item.returnType = new ast.TypeAst(`${context.name}`).visit(this, context);
+                item.returnType = new ast.TypeAst(`UpdateResult`).visit(this, context);
                 item.requiredReturn = true;
                 item.parameters = [
                     new ast.ParameterAst(
@@ -489,7 +489,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                     ).visit(this, context),
                     new ast.ParameterAst(
                         0,
-                        `options`,
+                        `option`,
                         new ast.TypeAst(`RemoveOptions`).visit(this, context),
                         false
                     ).visit(this, context)
@@ -508,7 +508,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                 ];
                 break;
             case `update`:
-                item.returnType = new ast.TypeAst(`${context.name}UpdateResult`).visit(this, context);
+                item.returnType = new ast.TypeAst(`UpdateResult`).visit(this, context);
                 item.requiredReturn = true;
                 item.parameters = [
                     new ast.ParameterAst(
