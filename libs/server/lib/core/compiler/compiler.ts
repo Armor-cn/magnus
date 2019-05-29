@@ -229,15 +229,6 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                     )
                 ];
                 break;
-            case `${context.name}FindOneQuery`:
-                item.properties = [
-                    new ast.PropertyAst(
-                        `options`,
-                        new ast.ObjectLiteralAst(),
-                        false
-                    )
-                ];
-                break;
             case `${context.name}WatchResult`:
                 item.properties = [
                     new ast.PropertyAst(
@@ -537,7 +528,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                     new ast.ParameterAst(
                         0,
                         `options`,
-                        new ast.TypeAst(`${context.name}FindQuery`).visit(this, context),
+                        new ast.TypeAst(`${context.name}FindConditions`).visit(this, context),
                         true
                     ).visit(this, context)
                 ];
@@ -573,7 +564,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                     new ast.ParameterAst(
                         0,
                         `options`,
-                        new ast.TypeAst(`${context.name}FindOneQuery`).visit(this, context),
+                        new ast.TypeAst(`${context.name}FindOneOptions`).visit(this, context),
                         true
                     ).visit(this, context)
                 ];

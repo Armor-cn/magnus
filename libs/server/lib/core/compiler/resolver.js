@@ -13,11 +13,11 @@ var OrderType;
 })(OrderType = exports.OrderType || (exports.OrderType = {}));
 const apollo_server_1 = require("apollo-server");
 function isArgsMethod(args) {
-    return args.length === 4;
+    return Array.isArray(args) && args.length === 4;
 }
 exports.isArgsMethod = isArgsMethod;
 function isArgsProperty(args) {
-    return args.length === 3;
+    return Array.isArray(args) && args.length === 3;
 }
 exports.isArgsProperty = isArgsProperty;
 class Resolver {
@@ -40,7 +40,7 @@ class Resolver {
                 if (isArgsMethod(args)) {
                     return this.find(args[1].options);
                 }
-                else {
+                else if (isArgsProperty(args)) {
                     return this.find(args[0].options);
                 }
             },
@@ -52,7 +52,7 @@ class Resolver {
                     return this.findAndCount(args[0].conditions);
                 }
             },
-            findByIds: (args) => {
+            findByIds: (...args) => {
                 if (isArgsMethod(args)) {
                     return this.findByIds(args[1].options);
                 }
@@ -60,11 +60,11 @@ class Resolver {
                     return this.findByIds(args[0].options);
                 }
             },
-            findOne: (args) => {
+            findOne: (...args) => {
                 if (isArgsMethod(args)) {
                     return this.findOne(args[1].options);
                 }
-                else {
+                else if (isArgsProperty(args)) {
                     return this.findOne(args[0].options);
                 }
             }
@@ -96,7 +96,7 @@ class Resolver {
                     return this.insert(args[0].entity);
                 }
             },
-            update: (args) => {
+            update: (...args) => {
                 if (isArgsMethod(args)) {
                     return this.update(args[1].where, args[1].entity);
                 }

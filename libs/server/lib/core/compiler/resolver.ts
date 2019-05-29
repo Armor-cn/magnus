@@ -56,10 +56,10 @@ export type ArgsMethod<T = any> = [undefined, T, any, any];
 export type ArgsProperty<T = any> = [T, any, any];
 export type Args<T = any> = ArgsMethod<T> | ArgsProperty<T>;
 export function isArgsMethod<T>(args: Args<T>): args is ArgsMethod<T> {
-    return args.length === 4;
+    return Array.isArray(args) && args.length === 4;
 }
 export function isArgsProperty<T>(args: Args<T>): args is ArgsProperty<T> {
-    return args.length === 3;
+    return Array.isArray(args) && args.length === 3;
 }
 export class Resolver<T> {
     pubsub: PubSub = new PubSub();
@@ -76,7 +76,7 @@ export class Resolver<T> {
             find: (...args: Args<{ options?: FindConditions<T> }>) => {
                 if (isArgsMethod(args)) {
                     return this.find(args[1].options)
-                } else {
+                } else if (isArgsProperty(args)) {
                     return this.find(args[0].options)
                 }
             },
@@ -87,17 +87,17 @@ export class Resolver<T> {
                     return this.findAndCount(args[0].conditions)
                 }
             },
-            findByIds: (args: Args<{ options: FindByIdsType<T> }>) => {
+            findByIds: (...args: Args<{ options: FindByIdsType<T> }>) => {
                 if (isArgsMethod(args)) {
                     return this.findByIds(args[1].options)
                 } else {
                     return this.findByIds(args[0].options)
                 }
             },
-            findOne: (args: Args<{ options: FindOneType<T> }>) => {
+            findOne: (...args: Args<{ options: FindOneType<T> }>) => {
                 if (isArgsMethod(args)) {
                     return this.findOne(args[1].options)
-                } else {
+                } else if (isArgsProperty(args)) {
                     return this.findOne(args[0].options)
                 }
             }
@@ -126,7 +126,7 @@ export class Resolver<T> {
                     return this.insert(args[0].entity)
                 }
             },
-            update: (args: Args<{ where: FindConditions<T>, entity: any }>) => {
+            update: (...args: Args<{ where: FindConditions<T>, entity: any }>) => {
                 if (isArgsMethod(args)) {
                     return this.update(args[1].where, args[1].entity)
                 } else {

@@ -133,11 +133,6 @@ class CompilerVisitor {
                     new ast.PropertyAst(`data`, new ast.UseAst(`${context.name}`), true)
                 ];
                 break;
-            case `${context.name}FindOneQuery`:
-                item.properties = [
-                    new ast.PropertyAst(`options`, new ast.ObjectLiteralAst(), false)
-                ];
-                break;
             case `${context.name}WatchResult`:
                 item.properties = [
                     new ast.PropertyAst(`data`, new ast.UseAst(`${context.name}`), true),
@@ -313,7 +308,7 @@ class CompilerVisitor {
                 item.returnType = new ast.TypeAst(`${context.name}FindResult`).visit(this, context);
                 item.requiredReturn = true;
                 item.parameters = [
-                    new ast.ParameterAst(0, `options`, new ast.TypeAst(`${context.name}FindQuery`).visit(this, context), true).visit(this, context)
+                    new ast.ParameterAst(0, `options`, new ast.TypeAst(`${context.name}FindConditions`).visit(this, context), true).visit(this, context)
                 ];
                 break;
             case `findAndCount`:
@@ -334,7 +329,7 @@ class CompilerVisitor {
                 item.returnType = new ast.TypeAst(`${context.name}`).visit(this, context);
                 item.requiredReturn = false;
                 item.parameters = [
-                    new ast.ParameterAst(0, `options`, new ast.TypeAst(`${context.name}FindOneQuery`).visit(this, context), true).visit(this, context)
+                    new ast.ParameterAst(0, `options`, new ast.TypeAst(`${context.name}FindOneOptions`).visit(this, context), true).visit(this, context)
                 ];
                 break;
             case `watch`:

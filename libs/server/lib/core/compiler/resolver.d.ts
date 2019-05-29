@@ -65,16 +65,16 @@ export declare class Resolver<T> {
         }>) => Promise<CountResultInput>;
         find: (...args: Args<{
             options?: FindConditions<T> | undefined;
-        }>) => Promise<MultiResult<T>>;
+        }>) => Promise<MultiResult<T>> | undefined;
         findAndCount: (...args: Args<{
             conditions?: FindConditions<T> | undefined;
         }>) => Promise<FindAndCountResultInput<T>>;
-        findByIds: (args: Args<{
+        findByIds: (...args: Args<{
             options: FindByIdsType<T>;
         }>) => Promise<MultiResult<T>>;
-        findOne: (args: Args<{
+        findOne: (...args: Args<{
             options: FindOneType<T>;
-        }>) => Promise<SignalResult<T> | undefined>;
+        }>) => Promise<SignalResult<T> | undefined> | undefined;
     };
     getMutation(): {
         save: (...args: Args<{
@@ -88,7 +88,7 @@ export declare class Resolver<T> {
         insert: (...args: Args<{
             entity: T;
         }>) => Promise<InsertResult>;
-        update: (args: Args<{
+        update: (...args: Args<{
             where: FindConditions<T>;
             entity: any;
         }>) => Promise<UpdateResult>;
