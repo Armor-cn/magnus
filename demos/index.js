@@ -10,22 +10,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Common_1 = require("@nestjs/Common");
-const index_1 = require("../../lib/index");
-const entities_1 = __importDefault(require("../entities"));
+const magnus_1 = require("@notadd/magnus");
+const typeorm_1 = __importDefault(require("./typeorm"));
 const core_1 = require("@nestjs/core");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
     Common_1.Module({
         imports: [
-            index_1.MagnusServerModule.forRoot({
+            magnus_1.MagnusServerModule.forRoot({
                 type: 'postgres',
                 host: 'localhost',
                 username: 'prisma',
                 password: 'prisma',
                 database: 'prisma',
                 port: 5432,
-                entities: entities_1.default,
+                entities: typeorm_1.default,
                 synchronize: true
             }, {})
         ],

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/Common'
-import { MagnusServerModule } from '../../lib/index';
-import entities from '../entities';
+import { MagnusServerModule } from '@notadd/magnus';
+import entities from './typeorm';
 import { NestFactory } from '@nestjs/core';
 @Module({
     imports: [
@@ -18,12 +18,10 @@ import { NestFactory } from '@nestjs/core';
     providers: []
 })
 export class AppModule { }
-
 async function bootstrap() {
     const app = await NestFactory.create(AppModule)
     return app.listen(9000, () => {
         console.log(`nest bootstrap with magnus`)
     });
 }
-
 bootstrap();

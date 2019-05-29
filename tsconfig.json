@@ -60,7 +60,8 @@
     }
   },
   "include": [
-    "libs"
+    "libs",
+    "demos"
   ],
   "exclude": [
     "node_modules"
