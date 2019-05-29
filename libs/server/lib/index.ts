@@ -20,14 +20,18 @@ export class MagnusServerModule {
         @Inject(MAGNUS_CONFIG) private readonly config: NagnusConfig,
     ) { }
 
-    static forRoot(options: ConnectionOptions) {
+    static forRoot(options: ConnectionOptions, config: NagnusConfig) {
         return {
             module: MagnusServerModule,
             providers: [
                 {
                     provide: MAGNUS_TYPEORM_OPTIONS,
                     useValue: options,
-                }
+                },
+                {
+                    provide: MAGNUS_CONFIG,
+                    useValue: config,
+                },
             ]
         }
     }

@@ -13,12 +13,15 @@ export declare class MagnusServerModule {
     private readonly options;
     private readonly config;
     constructor(httpAdapterHost: HttpAdapterHost, options: ConnectionOptions, config: NagnusConfig);
-    static forRoot(options: ConnectionOptions): {
+    static forRoot(options: ConnectionOptions, config: NagnusConfig): {
         module: typeof MagnusServerModule;
-        providers: {
+        providers: ({
             provide: string;
             useValue: ConnectionOptions;
-        }[];
+        } | {
+            provide: string;
+            useValue: NagnusConfig;
+        })[];
     };
     onModuleInit(): Promise<void>;
 }

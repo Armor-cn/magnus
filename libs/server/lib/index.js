@@ -24,14 +24,18 @@ let MagnusServerModule = MagnusServerModule_1 = class MagnusServerModule {
         this.options = options;
         this.config = config;
     }
-    static forRoot(options) {
+    static forRoot(options, config) {
         return {
             module: MagnusServerModule_1,
             providers: [
                 {
                     provide: exports.MAGNUS_TYPEORM_OPTIONS,
                     useValue: options,
-                }
+                },
+                {
+                    provide: exports.MAGNUS_CONFIG,
+                    useValue: config,
+                },
             ]
         };
     }
