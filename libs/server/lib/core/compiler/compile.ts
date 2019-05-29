@@ -11,7 +11,6 @@ export function compile(connection: Connection, entities: ObjectType<any>[]): Do
     const nodes: DocumentNode[] = [];
     const compiler = new Compiler(connection, entities);
     const code = compiler.progress.visit(visitor, metadatas);
-    writeFileSync(join(__dirname, `main.graphql`), code)
     nodes.push(gql`${code}`);
     return nodes;
 }
