@@ -1,0 +1,56 @@
+Arguments: 
+  /Users/ims/.nvm/versions/node/v12.3.1/bin/node /usr/local/bin/yarn add apollo-boost react-apollo graphql
+
+PATH: 
+  /Users/ims/.nvm/versions/node/v12.3.1/bin:/Users/ims/bin:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/ims/.nvm/versions/node/v12.3.1/bin:/Users/ims/bin
+
+Yarn version: 
+  1.13.0
+
+Node version: 
+  12.3.1
+
+Platform: 
+  darwin x64
+
+Trace: 
+  Error: Client network socket disconnected before secure TLS connection was established
+      at TLSSocket.onConnectEnd (_tls_wrap.js:1354:19)
+      at Object.onceWrapper (events.js:288:20)
+      at TLSSocket.emit (events.js:205:15)
+      at endReadableNT (_stream_readable.js:1137:12)
+      at processTicksAndRejections (internal/process/task_queues.js:84:9)
+
+npm manifest: 
+  {
+  	"name": "@notadd/magnus",
+  	"version": "0.0.8",
+  	"description": "> TODO: description",
+  	"author": "imeepos <1037483576@qq.com>",
+  	"homepage": "https://github.com/notadd/magnus/tree/master/libs/server#readme",
+  	"license": "ISC",
+  	"main": "lib/index.js",
+  	"typings": "lib/index.d.ts",
+  	"directories": {
+  		"lib": "lib",
+  		"test": "__tests__"
+  	},
+  	"files": [ "lib" ],
+  	"repository": {
+  		"type": "git",
+  		"url": "git+https://github.com/notadd/magnus.git"
+  	},
+  	"scripts": {
+  		"test": "echo \"Error: run tests from root\" && exit 1"
+  	},
+  	"bugs": {
+  		"url": "https://github.com/notadd/magnus/issues"
+  	},
+  	"gitHead": "2144764cde37952d44fe61191eebfe6c2341dce9"
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

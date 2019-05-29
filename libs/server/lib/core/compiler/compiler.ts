@@ -686,12 +686,10 @@ function checkRelationRequired(column: RelationMetadata) {
 function checkRequired(column: ColumnMetadata) {
     let required = false;
     // 如果可以不是null
-    if (!column.isNullable) {
-        if (!column.default || column.isUpdateDate || column.isCreateDate || column.isGenerated) {
-            required = false;
-        } else {
-            required = true;
-        }
+    if (typeof column.default !== 'undefined' || column.isUpdateDate || column.isCreateDate || column.isGenerated) {
+        required = false;
+    } else {
+        required = true;
     }
     return required;
 }
