@@ -10,10 +10,11 @@ export declare class ProgressAst extends Ast {
     visit(visitor: AstVisitor, context: any): any;
 }
 export declare class DocumentAst extends Ast {
+    name: string;
     mutation: MutationAst;
     query: QueryAst;
     subscription: SubscriptionAst;
-    constructor();
+    constructor(name: string);
     visit(visitor: AstVisitor, context: any): any;
 }
 export declare class EmptyAst extends Ast {
@@ -102,6 +103,7 @@ export declare class PropertyAst extends Ast {
     visit(visitor: AstVisitor, context: any): any;
 }
 export declare type AstType = ArrayAst | IdAst | BooleanAst | FloatAst | IntAst | StringAst | TypeAst | EnumAst;
+export declare function isTypeAst(val: any): val is TypeAst;
 export declare class UseAst extends Ast {
     name: string;
     type: 'enum' | 'type' | 'input';
@@ -163,3 +165,4 @@ export declare class NullAstVisitor<T = any> implements AstVisitor<T> {
     visitProgressAst(ast: ProgressAst, context: T): any;
     visitEmptyAst(ast: EmptyAst, context: T): void;
 }
+export declare function isMethodAst(ast: any): ast is MethodAst;

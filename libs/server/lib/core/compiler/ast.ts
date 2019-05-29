@@ -15,7 +15,7 @@ export class DocumentAst extends Ast {
     mutation: MutationAst;
     query: QueryAst;
     subscription: SubscriptionAst;
-    constructor() {
+    constructor(public name: string) {
         super();
     }
     visit(visitor: AstVisitor, context: any) {
@@ -183,6 +183,9 @@ export class PropertyAst extends Ast {
     }
 }
 export type AstType = ArrayAst | IdAst | BooleanAst | FloatAst | IntAst | StringAst | TypeAst | EnumAst;
+export function isTypeAst(val: any): val is TypeAst {
+    return Array.isArray((val as TypeAst).properties)
+}
 export class UseAst extends Ast {
     name: string;
     type: 'enum' | 'type' | 'input';
@@ -257,4 +260,8 @@ export class NullAstVisitor<T = any> implements AstVisitor<T> {
     visitDateAst(ast: DateAst, context: T): any { }
     visitProgressAst(ast: ProgressAst, context: T): any { }
     visitEmptyAst(ast: EmptyAst, context: T) { }
+}
+
+export function isMethodAst(ast: any): ast is MethodAst {
+    return Array.isArray((ast as MethodAst).parameters)
 }

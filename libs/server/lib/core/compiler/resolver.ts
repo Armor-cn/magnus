@@ -52,41 +52,104 @@ interface WatchInput {
     mutation_in: MutationType[];
 }
 import { PubSub } from 'apollo-server'
+export type ArgsMethod<T = any> = [undefined, T, any, any];
+export type ArgsProperty<T = any> = [T, any, any];
+export type Args<T = any> = ArgsMethod<T> | ArgsProperty<T>;
+export function isArgsMethod<T>(args: Args<T>): args is ArgsMethod<T> {
+    return args.length === 4;
+}
+export function isArgsProperty<T>(args: Args<T>): args is ArgsProperty<T> {
+    return args.length === 3;
+}
 export class Resolver<T> {
     pubsub: PubSub = new PubSub();
     constructor(public repository: Repository<T>, public name: string) { }
     getQuery() {
         return {
-            count: (args: { options?: FindManyOptions<T> }) => this.count(args.options),
-            find: (args: { options?: FindConditions<T> }) => this.find(args.options),
-            findAndCount: (args: { conditions?: FindConditions<T> }) => this.findAndCount(args.conditions),
-            findByIds: (args: { options: FindByIdsType<T> }) => this.findByIds(args.options),
-            findOne: (args: { options: FindOneType<T> }) => this.findOne(args.options)
+            count: (...args: Args<{ options: FindManyOptions }>) => {
+                if (isArgsMethod(args)) {
+                    return this.count(args[1].options)
+                } else {
+                    return this.count(args[0].options)
+                }
+            },
+            find: (...args: Args<{ options?: FindConditions<T> }>) => {
+                if (isArgsMethod(args)) {
+                    return this.find(args[1].options)
+                } else {
+                    return this.find(args[0].options)
+                }
+            },
+            findAndCount: (...args: Args<{ conditions?: FindConditions<T> }>) => {
+                if (isArgsMethod(args)) {
+                    return this.findAndCount(args[1].conditions)
+                } else {
+                    return this.findAndCount(args[0].conditions)
+                }
+            },
+            findByIds: (args: Args<{ options: FindByIdsType<T> }>) => {
+                if (isArgsMethod(args)) {
+                    return this.findByIds(args[1].options)
+                } else {
+                    return this.findByIds(args[0].options)
+                }
+            },
+            findOne: (args: Args<{ options: FindOneType<T> }>) => {
+                if (isArgsMethod(args)) {
+                    return this.findOne(args[1].options)
+                } else {
+                    return this.findOne(args[0].options)
+                }
+            }
         }
     }
     getMutation() {
         return {
-            save: (args: { entity: T, option?: SaveOptions }) => {
-                return this.save(args.entity, args.option)
+            save: (...args: Args<{ entity: T, option?: SaveOptions }>) => {
+                if (isArgsMethod(args)) {
+                    return this.save(args[1].entity, args[1].option)
+                } else {
+                    return this.save(args[0].entity, args[0].option)
+                }
             },
-            remove: (args: { entity: T, options?: RemoveOptions }) => {
-                return this.remove(args.entity, args.options)
+            remove: (...args: Args<{ entity: T, option?: RemoveOptions }>) => {
+                if (isArgsMethod(args)) {
+                    return this.remove(args[1].entity, args[1].option)
+                } else {
+                    return this.remove(args[0].entity, args[0].option)
+                }
             },
-            insert: (args: { entity: T }) => {
-                return this.insert(args.entity)
+            insert: (...args: Args<{ entity: T }>) => {
+                if (isArgsMethod(args)) {
+                    return this.insert(args[1].entity)
+                } else {
+                    return this.insert(args[0].entity)
+                }
             },
-            update: (args: { where: FindConditions<T>, entity: any }) => {
-                return this.update(args.where, args.entity)
+            update: (args: Args<{ where: FindConditions<T>, entity: any }>) => {
+                if (isArgsMethod(args)) {
+                    return this.update(args[1].where, args[1].entity)
+                } else {
+                    return this.update(args[0].where, args[0].where)
+                }
             },
-            delete: (args: { where: FindConditions<T> }) => {
-                return this.delete(args.where)
+            delete: (...args: Args<{ where: FindConditions<T> }>) => {
+                if (isArgsMethod(args)) {
+                    return this.delete(args[1].where)
+                } else {
+                    return this.delete(args[0].where)
+                }
             }
         }
     }
     getSubscribtion() {
         return {
-            watch: (args: { watch: WatchInput }) => {
-                return this.pubsub.asyncIterator(args.watch.mutation_in)
+            watch: (...args: Args<{ watch: WatchInput }>) => {
+                if (isArgsMethod(args)) {
+                    return this.pubsub.asyncIterator(args[1].watch.mutation_in)
+                } else {
+                    return this.pubsub.asyncIterator(args[0].watch.mutation_in)
+                }
             }
         }
     }

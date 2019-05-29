@@ -25,4 +25,10 @@ export declare class ParseVisitor implements ast.AstVisitor {
     visitDocumentAst(ast: ast.DocumentAst, context: ast.ProgressAst): any;
 }
 export declare class ParseOuterVisitor extends ParseVisitor {
+    name: string;
+    parent: ParseVisitor;
+    constructor(name: string, progress: ast.ProgressAst, parent: ParseVisitor);
+    visitQueryAst(item: ast.QueryAst, context: any): any;
+    visitMutationAst(item: ast.MutationAst, context: any): string;
+    visitSubscriptionAst(item: ast.SubscriptionAst, context: any): string;
 }

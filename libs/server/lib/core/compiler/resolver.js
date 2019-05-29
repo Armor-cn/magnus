@@ -12,6 +12,14 @@ var OrderType;
     OrderType["DESC"] = "DESC";
 })(OrderType = exports.OrderType || (exports.OrderType = {}));
 const apollo_server_1 = require("apollo-server");
+function isArgsMethod(args) {
+    return args.length === 4;
+}
+exports.isArgsMethod = isArgsMethod;
+function isArgsProperty(args) {
+    return args.length === 3;
+}
+exports.isArgsProperty = isArgsProperty;
 class Resolver {
     constructor(repository, name) {
         this.repository = repository;
@@ -20,36 +28,101 @@ class Resolver {
     }
     getQuery() {
         return {
-            count: (args) => this.count(args.options),
-            find: (args) => this.find(args.options),
-            findAndCount: (args) => this.findAndCount(args.conditions),
-            findByIds: (args) => this.findByIds(args.options),
-            findOne: (args) => this.findOne(args.options)
+            count: (...args) => {
+                if (isArgsMethod(args)) {
+                    return this.count(args[1].options);
+                }
+                else {
+                    return this.count(args[0].options);
+                }
+            },
+            find: (...args) => {
+                if (isArgsMethod(args)) {
+                    return this.find(args[1].options);
+                }
+                else {
+                    return this.find(args[0].options);
+                }
+            },
+            findAndCount: (...args) => {
+                if (isArgsMethod(args)) {
+                    return this.findAndCount(args[1].conditions);
+                }
+                else {
+                    return this.findAndCount(args[0].conditions);
+                }
+            },
+            findByIds: (args) => {
+                if (isArgsMethod(args)) {
+                    return this.findByIds(args[1].options);
+                }
+                else {
+                    return this.findByIds(args[0].options);
+                }
+            },
+            findOne: (args) => {
+                if (isArgsMethod(args)) {
+                    return this.findOne(args[1].options);
+                }
+                else {
+                    return this.findOne(args[0].options);
+                }
+            }
         };
     }
     getMutation() {
         return {
-            save: (args) => {
-                return this.save(args.entity, args.option);
+            save: (...args) => {
+                if (isArgsMethod(args)) {
+                    return this.save(args[1].entity, args[1].option);
+                }
+                else {
+                    return this.save(args[0].entity, args[0].option);
+                }
             },
-            remove: (args) => {
-                return this.remove(args.entity, args.options);
+            remove: (...args) => {
+                if (isArgsMethod(args)) {
+                    return this.remove(args[1].entity, args[1].option);
+                }
+                else {
+                    return this.remove(args[0].entity, args[0].option);
+                }
             },
-            insert: (args) => {
-                return this.insert(args.entity);
+            insert: (...args) => {
+                if (isArgsMethod(args)) {
+                    return this.insert(args[1].entity);
+                }
+                else {
+                    return this.insert(args[0].entity);
+                }
             },
             update: (args) => {
-                return this.update(args.where, args.entity);
+                if (isArgsMethod(args)) {
+                    return this.update(args[1].where, args[1].entity);
+                }
+                else {
+                    return this.update(args[0].where, args[0].where);
+                }
             },
-            delete: (args) => {
-                return this.delete(args.where);
+            delete: (...args) => {
+                if (isArgsMethod(args)) {
+                    return this.delete(args[1].where);
+                }
+                else {
+                    return this.delete(args[0].where);
+                }
             }
         };
     }
     getSubscribtion() {
         return {
-            watch: (args) => {
-                return this.pubsub.asyncIterator(args.watch.mutation_in);
+            watch: (...args) => {
+                if (isArgsMethod(args)) {
+                    return this.pubsub.asyncIterator(args[1].watch.mutation_in);
+                }
+                else {
+                    return this.pubsub.asyncIterator(args[0].watch.mutation_in);
+                }
             }
         };
     }

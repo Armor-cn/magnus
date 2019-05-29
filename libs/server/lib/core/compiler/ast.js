@@ -18,8 +18,9 @@ class ProgressAst extends Ast {
 }
 exports.ProgressAst = ProgressAst;
 class DocumentAst extends Ast {
-    constructor() {
+    constructor(name) {
         super();
+        this.name = name;
     }
     visit(visitor, context) {
         return visitor.visitDocumentAst(this, context);
@@ -192,6 +193,10 @@ class PropertyAst extends Ast {
     }
 }
 exports.PropertyAst = PropertyAst;
+function isTypeAst(val) {
+    return Array.isArray(val.properties);
+}
+exports.isTypeAst = isTypeAst;
 class UseAst extends Ast {
     constructor(name) {
         super();
@@ -240,3 +245,7 @@ class NullAstVisitor {
     visitEmptyAst(ast, context) { }
 }
 exports.NullAstVisitor = NullAstVisitor;
+function isMethodAst(ast) {
+    return Array.isArray(ast.parameters);
+}
+exports.isMethodAst = isMethodAst;

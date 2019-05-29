@@ -49,52 +49,57 @@ interface WatchInput {
     mutation_in: MutationType[];
 }
 import { PubSub } from 'apollo-server';
+export declare type ArgsMethod<T = any> = [undefined, T, any, any];
+export declare type ArgsProperty<T = any> = [T, any, any];
+export declare type Args<T = any> = ArgsMethod<T> | ArgsProperty<T>;
+export declare function isArgsMethod<T>(args: Args<T>): args is ArgsMethod<T>;
+export declare function isArgsProperty<T>(args: Args<T>): args is ArgsProperty<T>;
 export declare class Resolver<T> {
     repository: Repository<T>;
     name: string;
     pubsub: PubSub;
     constructor(repository: Repository<T>, name: string);
     getQuery(): {
-        count: (args: {
-            options?: FindManyOptions<T> | undefined;
-        }) => Promise<CountResultInput>;
-        find: (args: {
+        count: (...args: Args<{
+            options: FindManyOptions<any>;
+        }>) => Promise<CountResultInput>;
+        find: (...args: Args<{
             options?: FindConditions<T> | undefined;
-        }) => Promise<MultiResult<T>>;
-        findAndCount: (args: {
+        }>) => Promise<MultiResult<T>>;
+        findAndCount: (...args: Args<{
             conditions?: FindConditions<T> | undefined;
-        }) => Promise<FindAndCountResultInput<T>>;
-        findByIds: (args: {
+        }>) => Promise<FindAndCountResultInput<T>>;
+        findByIds: (args: Args<{
             options: FindByIdsType<T>;
-        }) => Promise<MultiResult<T>>;
-        findOne: (args: {
+        }>) => Promise<MultiResult<T>>;
+        findOne: (args: Args<{
             options: FindOneType<T>;
-        }) => Promise<SignalResult<T> | undefined>;
+        }>) => Promise<SignalResult<T> | undefined>;
     };
     getMutation(): {
-        save: (args: {
+        save: (...args: Args<{
             entity: T;
             option?: SaveOptions | undefined;
-        }) => Promise<T>;
-        remove: (args: {
+        }>) => Promise<T>;
+        remove: (...args: Args<{
             entity: T;
-            options?: RemoveOptions | undefined;
-        }) => Promise<T>;
-        insert: (args: {
+            option?: RemoveOptions | undefined;
+        }>) => Promise<T>;
+        insert: (...args: Args<{
             entity: T;
-        }) => Promise<InsertResult>;
-        update: (args: {
+        }>) => Promise<InsertResult>;
+        update: (args: Args<{
             where: FindConditions<T>;
             entity: any;
-        }) => Promise<UpdateResult>;
-        delete: (args: {
+        }>) => Promise<UpdateResult>;
+        delete: (...args: Args<{
             where: FindConditions<T>;
-        }) => Promise<DeleteResult>;
+        }>) => Promise<DeleteResult>;
     };
     getSubscribtion(): {
-        watch: (args: {
+        watch: (...args: Args<{
             watch: WatchInput;
-        }) => AsyncIterator<{}>;
+        }>) => AsyncIterator<{}>;
     };
     save(entity: T, options?: SaveOptions): Promise<T>;
     saves(options: SavesInput<T>): Promise<MultiResult<T>>;

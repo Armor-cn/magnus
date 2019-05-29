@@ -6,6 +6,7 @@ const graphql_1 = require("graphql");
 const language_1 = require("graphql/language");
 const compile_1 = require("./compiler/compile");
 const resolver_1 = require("./compiler/resolver");
+const lodash_1 = require("lodash");
 class CoreServer {
     constructor(_options, _connection, _server) {
         this._options = _options;
@@ -36,7 +37,11 @@ class CoreServer {
         const options = {};
         this.resolver.map(res => {
             options[`${res.name}`] = (...args) => {
-                return res.getMutation();
+                const query = res.getMutation();
+                options[`${res.name}`] = () => query;
+                Object.keys(query).map(key => {
+                    options[`${lodash_1.lowerFirst(res.name)}${lodash_1.upperFirst(key)}`] = query[`${key}`];
+                });
             };
         });
         return options;
@@ -44,14 +49,22 @@ class CoreServer {
     createQuery() {
         const options = {};
         this.resolver.map(res => {
-            options[`${res.name}`] = () => res.getQuery();
+            const query = res.getQuery();
+            options[`${res.name}`] = () => query;
+            Object.keys(query).map(key => {
+                options[`${lodash_1.lowerFirst(res.name)}${lodash_1.upperFirst(key)}`] = query[`${key}`];
+            });
         });
         return options;
     }
     createSubscription() {
         const options = {};
         this.resolver.map(res => {
-            options[`${res.name}`] = () => res.getSubscribtion();
+            const query = res.getSubscribtion();
+            options[`${res.name}`] = () => query;
+            Object.keys(query).map(key => {
+                options[`${lodash_1.lowerFirst(res.name)}${lodash_1.upperFirst(key)}`] = query[`${key}`];
+            });
         });
         return options;
     }

@@ -8,6 +8,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const ast = __importStar(require("./ast"));
+const lodash_1 = require("lodash");
 class ParseVisitor {
     visitEmptyAst(item, context) {
         return ``;
@@ -17,8 +18,8 @@ class ParseVisitor {
         const scalars = item.scalars.map(scalar => scalar.visit(this, context)).join(`\n`);
         const enu = item.enums.map(enu => enu.visit(this, context)).join(`\n`);
         let mutation = ``, query = ``, subscription = ``;
-        const outer = new ParseOuterVisitor();
         item.docs.map(doc => {
+            const outer = new ParseOuterVisitor(doc.name, this.progress, this);
             mutation += doc.mutation.visit(this, item);
             mutation += doc.mutation.visit(outer, item);
             query += doc.query.visit(this, item);
@@ -190,5 +191,50 @@ ${mutation}
 }
 exports.ParseVisitor = ParseVisitor;
 class ParseOuterVisitor extends ParseVisitor {
+    constructor(name, progress, parent) {
+        super();
+        this.name = name;
+        this.progress = progress;
+        this.parent = parent;
+    }
+    visitQueryAst(item, context) {
+        return item.properties.map((it, key) => {
+            if (ast.isMethodAst(it)) { }
+            else {
+                // 如果是属性
+                if (ast.isTypeAst(it.type)) {
+                    return it.type.properties.map((pro) => {
+                        return `\t${lodash_1.lowerFirst(this.name)}${lodash_1.upperFirst(pro.visit(this, context))}\n`;
+                    }).join(`\n`);
+                }
+            }
+        }).join(`\n\t`);
+    }
+    visitMutationAst(item, context) {
+        return item.properties.map((it, key) => {
+            if (ast.isMethodAst(it)) { }
+            else {
+                // 如果是属性
+                if (ast.isTypeAst(it.type)) {
+                    return it.type.properties.map((pro) => {
+                        return `\t${lodash_1.lowerFirst(this.name)}${lodash_1.upperFirst(pro.visit(this, context))}\n`;
+                    }).join(`\n\t`);
+                }
+            }
+        }).join(`\n\t`);
+    }
+    visitSubscriptionAst(item, context) {
+        return item.properties.map((it) => {
+            if (ast.isMethodAst(it)) { }
+            else {
+                // 如果是属性
+                if (ast.isTypeAst(it.type)) {
+                    return it.type.properties.map((pro) => {
+                        return `${lodash_1.lowerFirst(this.name)}${lodash_1.upperFirst(pro.visit(this, context))}\n`;
+                    }).join(`\n\t`);
+                }
+            }
+        }).join(`\n\t`);
+    }
 }
 exports.ParseOuterVisitor = ParseOuterVisitor;

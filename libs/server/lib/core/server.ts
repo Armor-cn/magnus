@@ -5,6 +5,8 @@ import { Kind } from 'graphql/language';
 import { compile } from './compiler/compile'
 import { IResolvers } from 'graphql-tools';
 import { Resolver } from './compiler/resolver'
+import { lowerFirst, upperFirst } from 'lodash';
+
 export class CoreServer {
     resolver: Resolver<any>[] = [];
     constructor(
@@ -37,7 +39,11 @@ export class CoreServer {
         const options: any = {};
         this.resolver.map(res => {
             options[`${res.name}`] = (...args: any[]) => {
-                return res.getMutation()
+                const query: any = res.getMutation();
+                options[`${res.name}`] = () => query;
+                Object.keys(query).map(key => {
+                    options[`${lowerFirst(res.name)}${upperFirst(key)}`] = query[`${key}`];
+                });
             }
         });
         return options;
@@ -45,14 +51,22 @@ export class CoreServer {
     createQuery() {
         const options: any = {};
         this.resolver.map(res => {
-            options[`${res.name}`] = () => res.getQuery()
+            const query: any = res.getQuery();
+            options[`${res.name}`] = () => query;
+            Object.keys(query).map(key => {
+                options[`${lowerFirst(res.name)}${upperFirst(key)}`] = query[`${key}`];
+            });
         });
         return options;
     }
     createSubscription() {
         const options: any = {};
         this.resolver.map(res => {
-            options[`${res.name}`] = () => res.getSubscribtion()
+            const query: any = res.getSubscribtion();
+            options[`${res.name}`] = () => query;
+            Object.keys(query).map(key => {
+                options[`${lowerFirst(res.name)}${upperFirst(key)}`] = query[`${key}`];
+            });
         });
         return options;
     }

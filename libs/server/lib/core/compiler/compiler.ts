@@ -30,7 +30,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
             ])
         );
         metas.map(meta => {
-            const doc = new ast.DocumentAst();
+            const doc = new ast.DocumentAst(meta.name);
             item.docs.push(doc.visit(this, meta))
         });
         this.progress = item;

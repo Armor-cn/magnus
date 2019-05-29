@@ -1,4 +1,6 @@
 import * as ast from './ast';
+import { lowerFirst, upperFirst } from 'lodash';
+
 export class ParseVisitor implements ast.AstVisitor {
     progress: ast.ProgressAst;
     visitEmptyAst(item: ast.ProgressAst, context: any) {
@@ -9,8 +11,8 @@ export class ParseVisitor implements ast.AstVisitor {
         const scalars = item.scalars.map(scalar => scalar.visit(this, context)).join(`\n`);
         const enu = item.enums.map(enu => enu.visit(this, context)).join(`\n`);
         let mutation = ``, query = ``, subscription = ``;
-        const outer = new ParseOuterVisitor();
         item.docs.map(doc => {
+            const outer = new ParseOuterVisitor(doc.name, this.progress, this);
             mutation += doc.mutation.visit(this, item);
             mutation += doc.mutation.visit(outer, item)
             query += doc.query.visit(this, item);
@@ -90,7 +92,6 @@ ${mutation}
     visitSubscriptionAst(ast: ast.SubscriptionAst, context: any): any {
         return `\t${ast.properties.map(method => method.visit(this, 'output')).join(`\n\t`)}\n`
     }
-
     visitEnumAst(ast: ast.EnumAst, context: any): any {
         return `enum ${ast.name} {\n\t${ast.properties.join(`\n\t`)}\n}\n`
     }
@@ -178,5 +179,48 @@ ${mutation}
     }
 }
 
-export class ParseOuterVisitor extends ParseVisitor { 
+export class ParseOuterVisitor extends ParseVisitor {
+    parent: ParseVisitor;
+    constructor(public name: string, progress: ast.ProgressAst, parent: ParseVisitor) {
+        super();
+        this.progress = progress;
+        this.parent = parent;
+    }
+    visitQueryAst(item: ast.QueryAst, context: any): any {
+        return item.properties.map((it, key) => {
+            if (ast.isMethodAst(it)) { } else {
+                // 如果是属性
+                if (ast.isTypeAst(it.type)) {
+                    return it.type.properties.map((pro) => {
+                        return `\t${lowerFirst(this.name)}${upperFirst(pro.visit(this, context))}\n`
+                    }).join(`\n`)
+                }
+            }
+        }).join(`\n\t`)
+    }
+    visitMutationAst(item: ast.MutationAst, context: any): string {
+        return item.properties.map((it, key) => {
+            if (ast.isMethodAst(it)) { } else {
+                // 如果是属性
+                if (ast.isTypeAst(it.type)) {
+                    return it.type.properties.map((pro) => {
+                        return `\t${lowerFirst(this.name)}${upperFirst(pro.visit(this, context))}\n`
+                    }).join(`\n\t`)
+                }
+            }
+        }).join(`\n\t`)
+    }
+    visitSubscriptionAst(item: ast.SubscriptionAst, context: any): string {
+        return item.properties.map((it) => {
+            if (ast.isMethodAst(it)) { } else {
+                // 如果是属性
+                if (ast.isTypeAst(it.type)) {
+                    return it.type.properties.map((pro) => {
+                        return `${lowerFirst(this.name)}${upperFirst(pro.visit(this, context))}\n`
+                    }).join(`\n\t`)
+                }
+            }
+        }).join(`\n\t`)
+    }
 }
+

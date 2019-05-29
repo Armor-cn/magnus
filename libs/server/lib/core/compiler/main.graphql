@@ -238,16 +238,54 @@ type PostSubscription {
 
 type Query {
 	User:UserQuery!
+	userCount(options: UserFindManyOptions): UserCountResult!
+
+	userFind(options: UserFindQuery!): UserFindResult!
+
+	userFindAndCount(options: UserFindManyOptions!): UserFindAndCountResult!
+
+	userFindByIds(options: UserFindByIdsQuery!): UserFindByIdsResult!
+
+	userFindOne(options: UserFindOneQuery!): UserOutput
 	Post:PostQuery!
+	postCount(options: PostFindManyOptions): PostCountResult!
+
+	postFind(options: PostFindQuery!): PostFindResult!
+
+	postFindAndCount(options: PostFindManyOptions!): PostFindAndCountResult!
+
+	postFindByIds(options: PostFindByIdsQuery!): PostFindByIdsResult!
+
+	postFindOne(options: PostFindOneQuery!): PostOutput
 
 }
 type Subscription {
 	User:UserSubscription!
+userWatch(options: UserWatchInput!): UserWatchResult!
 	Post:PostSubscription!
+postWatch(options: PostWatchInput!): PostWatchResult!
  
 }
 type Mutation {
 	User:UserMutation!
+	userSave(entity: User!, options: SaveOptions): UserOutput!
+
+		userRemove(entity: User!, options: RemoveOptions): UserOutput!
+
+		userInsert(options: UserInput!): UserInsertResult!
+
+		userUpdate(where: UserFindConditions!, options: User!): UserUpdateResult!
+
+		userDelete(options: UserFindConditions!): UserDeleteResult!
 	Post:PostMutation!
+	postSave(entity: Post!, options: SaveOptions): PostOutput!
+
+		postRemove(entity: Post!, options: RemoveOptions): PostOutput!
+
+		postInsert(options: PostInput!): PostInsertResult!
+
+		postUpdate(where: PostFindConditions!, options: Post!): PostUpdateResult!
+
+		postDelete(options: PostFindConditions!): PostDeleteResult!
  
 }
