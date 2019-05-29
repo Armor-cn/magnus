@@ -1,4 +1,4 @@
-import { Repository, FindManyOptions, FindOneOptions, ObjectID, UpdateResult, DeleteResult, FindConditions, InsertResult, RemoveOptions, SaveOptions } from 'typeorm';
+import { Repository, FindManyOptions, FindOneOptions, UpdateResult, DeleteResult, FindConditions, InsertResult, RemoveOptions, SaveOptions } from 'typeorm';
 export declare enum MutationType {
     CREATED = "CREATED",
     UPDATED = "UPDATED",
@@ -41,10 +41,6 @@ interface FindByIdsType<T> {
     ids: any[];
     options?: FindManyOptions<T>;
 }
-interface FindOneType<T> {
-    id?: string | number | Date | ObjectID;
-    options?: FindOneOptions<T>;
-}
 interface WatchInput {
     mutation_in: MutationType[];
 }
@@ -73,7 +69,7 @@ export declare class Resolver<T> {
             options: FindByIdsType<T>;
         }>) => Promise<MultiResult<T>>;
         findOne: (...args: Args<{
-            options: FindOneType<T>;
+            options: FindOneOptions<T>;
         }>) => Promise<SignalResult<T> | undefined> | undefined;
     };
     getMutation(): {
@@ -115,6 +111,6 @@ export declare class Resolver<T> {
     findManyAndCount(options?: FindManyOptions<T>): Promise<FindAndCountResultInput<T>>;
     findAndCount(conditions?: FindConditions<T>): Promise<FindAndCountResultInput<T>>;
     findByIds(options: FindByIdsType<T>): Promise<MultiResult<T>>;
-    findOne(options: FindOneType<T>): Promise<SignalResult<T> | undefined>;
+    findOne(options: FindOneOptions<T>): Promise<SignalResult<T> | undefined>;
 }
 export {};

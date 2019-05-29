@@ -94,7 +94,7 @@ export class Resolver<T> {
                     return this.findByIds(args[0].options)
                 }
             },
-            findOne: (...args: Args<{ options: FindOneType<T> }>) => {
+            findOne: (...args: Args<{ options: FindOneOptions<T> }>) => {
                 if (isArgsMethod(args)) {
                     return this.findOne(args[1].options)
                 } else if (isArgsProperty(args)) {
@@ -224,8 +224,8 @@ export class Resolver<T> {
         const data = await this.repository.findByIds(options.ids, options.options);
         return { data: data }
     }
-    async findOne(options: FindOneType<T>): Promise<SignalResult<T> | undefined> {
-        const data = await this.repository.findOne(options.id, options.options);
+    async findOne(options: FindOneOptions<T>): Promise<SignalResult<T> | undefined> {
+        const data = await this.repository.findOne(options);
         if (data) {
             return { data }
         }

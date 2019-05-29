@@ -198,7 +198,7 @@ class Resolver {
         return { data: data };
     }
     async findOne(options) {
-        const data = await this.repository.findOne(options.id, options.options);
+        const data = await this.repository.findOne(options);
         if (data) {
             return { data };
         }
