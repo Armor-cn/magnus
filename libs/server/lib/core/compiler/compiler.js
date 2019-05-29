@@ -294,7 +294,7 @@ class CompilerVisitor {
                 item.requiredReturn = true;
                 item.parameters = [
                     new ast.ParameterAst(0, 'where', new ast.UseAst(`${context.name}FindConditions`), true),
-                    new ast.ParameterAst(0, `options`, new ast.UseAst(`${context.name}`).visit(this, context), true).visit(this, context)
+                    new ast.ParameterAst(0, `options`, new ast.UseAst(`${context.name}Input`).visit(this, context), true).visit(this, context)
                 ];
                 break;
             case `delete`:

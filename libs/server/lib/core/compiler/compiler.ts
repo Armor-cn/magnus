@@ -504,7 +504,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                     new ast.ParameterAst(
                         0,
                         `options`,
-                        new ast.UseAst(`${context.name}`).visit(this, context),
+                        new ast.UseAst(`${context.name}Input`).visit(this, context),
                         true
                     ).visit(this, context)
                 ];
