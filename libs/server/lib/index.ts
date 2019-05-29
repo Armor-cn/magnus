@@ -22,7 +22,7 @@ export class MagnusServerModule implements OnModuleInit {
         @Inject(MAGNUS_TYPEORM_OPTIONS) private readonly options: ConnectionOptions,
         @Inject(MAGNUS_CONFIG) private readonly config: NagnusConfig
     ) { }
-    static forRoot(options: ConnectionOptions, config: NagnusConfig) {
+    static forRoot(options: ConnectionOptions, config: NagnusConfig = {}) {
         return {
             module: MagnusServerModule,
             providers: [
