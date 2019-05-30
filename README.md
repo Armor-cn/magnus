@@ -1,5 +1,5 @@
 <p align="center">
-    <img style="margin: 0 auto;" width="80px" src="./logo.png"/>
+    <img style="margin: 0 auto;" width="120px" src="./logo.png"/>
 </p>
 
 # magnus
