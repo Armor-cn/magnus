@@ -1,7 +1,8 @@
 import { Module, DynamicModule, Injectable, OnModuleInit, Inject } from "@nestjs/common";
-import { default as ApolloClient, PresetConfig, gql } from "apollo-boost";
+import { PresetConfig, gql } from "apollo-boost";
 export { gql }
 export { getConfig } from './config';
+import ApolloClient from 'apollo-boost/lib/index'
 export interface MagnusConfig {
     inputGolb: string;
     outputPath: string;
