@@ -11,7 +11,6 @@ export interface NagnusConfig {
     bodyParserConfig?: boolean;
     installSubscriptionHandlers?: boolean;
 }
-
 @Module({
     providers: [],
     exports: []

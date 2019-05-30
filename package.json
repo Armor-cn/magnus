@@ -19,6 +19,7 @@
 	},
 	"homepage": "https://github.com/notadd/magnus#readme",
 	"dependencies": {
+		"@angular/core": "^8.0.0",
 		"@nestjs/common": "^6.2.4",
 		"@nestjs/core": "^6.2.4",
 		"@nestjs/graphql": "^6.2.1",
