@@ -179,7 +179,7 @@ export class Resolver<T> {
             const type = relation.type;
             const repository = this.connection.getRepository(type)
             const data = (entity as any)[propertyName];
-            if (!!relation.joinTableName && data) {
+            if ((!!relation.joinTableName) || (!!relation.isWithJoinColumn) && data) {
                 return await repository.save(data);
             }
         }));

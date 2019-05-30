@@ -7,9 +7,9 @@ import { NestFactory } from '@nestjs/core';
         MagnusServerModule.forRoot({
             type: 'postgres',
             host: 'localhost',
-            username: 'prisma',
-            password: 'prisma',
-            database: 'prisma',
+            username: 'magnus',
+            password: 'magnus',
+            database: 'magnus',
             port: 5432,
             entities: entities,
             synchronize: true
