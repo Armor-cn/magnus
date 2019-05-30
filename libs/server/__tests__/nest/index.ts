@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/Common'
+import { Module } from '@nestjs/common'
 import { MagnusServerModule } from '../../lib/index';
 import entities from '../entities';
 import { NestFactory } from '@nestjs/core';
