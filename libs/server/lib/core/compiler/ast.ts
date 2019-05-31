@@ -1,9 +1,18 @@
 export abstract class Ast {
     abstract visit(visitor: AstVisitor, context: any): any;
 }
+export class UnionAst extends Ast {
+    constructor(public name: string, public properties: AstType[]) {
+        super();
+    }
+    visit(visitor: AstVisitor, context: any) {
+        return visitor.visitUnionAst(this, context);
+    }
+}
 export class ProgressAst extends Ast {
     scalars: ScalarAst[] = [];
     enums: EnumAst[] = [];
+    union: UnionAst[] = [];
     type: Map<string, TypeAst> = new Map();
     input: Map<string, TypeAst> = new Map();
     docs: DocumentAst[] = [];
@@ -65,9 +74,9 @@ export class MethodAst extends Ast {
 export class ParameterAst extends Ast {
     index: number;
     name: string;
-    ast: AstType;
+    ast: AstType | AstType[];
     required: boolean;
-    constructor(index: number, name: string, ast: AstType, required: boolean) {
+    constructor(index: number, name: string, ast: AstType | AstType[], required: boolean) {
         super();
         this.index = index;
         this.name = name;
@@ -174,9 +183,9 @@ export class ScalarAst extends Ast {
 
 export class PropertyAst extends Ast {
     name: string;
-    type: AstType;
+    type: AstType | AstType[];
     required: boolean;
-    constructor(name: string, type: AstType, required: boolean) {
+    constructor(name: string, type: AstType | AstType[], required: boolean) {
         super();
         this.name = name;
         this.type = type;
@@ -242,9 +251,11 @@ export interface AstVisitor<T = any> {
     visitDateAst(ast: DateAst, context: T): any;
     visitProgressAst(ast: ProgressAst, context: T): any;
     visitEmptyAst(ast: EmptyAst, context: T): any;
+    visitUnionAst(ast: UnionAst, context: T): any;
 }
 
 export class NullAstVisitor<T = any> implements AstVisitor<T> {
+    visitUnionAst(ast: UnionAst, context: T): any { }
     visitUseAst(ast: UseAst, context: T): any { }
     visitObjectLiteralAst(ast: ObjectLiteralAst, context: T): any { }
     visitTypeAst(ast: TypeAst, context: T): any { }

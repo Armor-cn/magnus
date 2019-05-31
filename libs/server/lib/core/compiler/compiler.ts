@@ -14,6 +14,9 @@ export class Compiler {
 
 export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
     progress: ast.ProgressAst;
+    visitUnionAst(ast: ast.UnionAst, context: any): any {
+        return ast;
+    }
     visitProgressAst(item: ast.ProgressAst, context: any): any {
         context.entities.map((entity: any) => {
             const meta = context.connection.getMetadata(entity)
@@ -136,7 +139,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
             case `${context.name}FindConditions`:
                 item.properties = [
                     ...context.ownColumns.map(column => {
-                        const type: ast.AstType = createType(column);
+                        let type: ast.AstType | ast.AstType[] = createType(column);
                         if (column.isVirtual) {
                             return new ast.EmptyAst(``)
                         }
@@ -333,11 +336,6 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                     new ast.PropertyAst(`skip`, new ast.IntAst(), false),
                     new ast.PropertyAst(`take`, new ast.IntAst(), false),
                     new ast.PropertyAst(`where`, new ast.UseAst(`${context.name}FindConditions`), false),
-                    new ast.PropertyAst(
-                        `relations`,
-                        new ast.ArrayAst(new ast.StringAst(), true),
-                        false
-                    ),
                     new ast.PropertyAst(
                         `join`,
                         new ast.TypeAst(`JoinOptions`).visit(this, context),
@@ -588,7 +586,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                     new ast.ParameterAst(
                         0,
                         `options`,
-                        new ast.TypeAst(`${context.name}FindConditions`).visit(this, context),
+                        new ast.TypeAst(`${context.name}FindManyOptions`).visit(this, context),
                         true
                     ).visit(this, context)
                 ];

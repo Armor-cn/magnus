@@ -3,12 +3,38 @@ import { lowerFirst, upperFirst } from 'lodash';
 
 export class ParseVisitor implements ast.AstVisitor {
     progress: ast.ProgressAst;
+    visitUnionAst(item: ast.UnionAst, context: any): any {
+        return `union ${item.name} = ${item.properties.map(pro => {
+            if (pro instanceof ast.StringAst) {
+                return `String`
+            }
+            else if (pro instanceof ast.IntAst) {
+                return `Int`
+            }
+            else if (pro instanceof ast.TypeAst) {
+                return `${pro.name}`
+            }
+            else if (pro instanceof ast.UseAst) {
+                return `${pro.name}`
+            }
+            else if (pro instanceof ast.BooleanAst) {
+                return `Boolean`
+            }
+            else if (pro instanceof ast.FloatAst) {
+                return `Float`
+            }
+            else if (pro instanceof ast.EnumAst) {
+                return `${pro.name}`
+            }
+        }).join(`| `)}\n`;
+    }
     visitEmptyAst(item: ast.ProgressAst, context: any) {
         return ``
     }
     visitProgressAst(item: ast.ProgressAst, context: any): string {
         this.progress = item;
         const scalars = item.scalars.map(scalar => scalar.visit(this, context)).join(`\n`);
+        const union = item.union.map(union => union.visit(this, context)).join(`\n`)
         const enu = item.enums.map(enu => enu.visit(this, context)).join(`\n`);
         let mutation = ``, query = ``, subscription = ``;
         item.docs.map(doc => {
@@ -31,6 +57,7 @@ export class ParseVisitor implements ast.AstVisitor {
             typeString += `{\n\t${input.properties.map(pro => pro.visit(this, `output`)).join(`\n\t`)}\n}\n`
         });
         return `
+${union}
 ${scalars}
 ${enu}
 ${inputString}
@@ -50,7 +77,12 @@ ${mutation}
         return `${ast.name}(${ast.parameters.map(par => par.visit(this, 'input')).join(', ')}): ${ast.returnType.visit(this, 'output')}${ast.requiredReturn ? `!` : ``}`
     }
     visitParameterAst(ast: ast.ParameterAst, context: 'input' | 'type'): string {
-        const type = ast.ast.visit(this, 'input');
+        let type = ``
+        if (Array.isArray(ast.ast)) {
+            type = ast.ast.map(ast => ast.visit && ast.visit(this, 'input')).join(`|`);
+        } else {
+            type = ast.ast.visit(this, 'input');
+        }
         return `${ast.name}: ${type}${ast.required ? `!` : ``}`;
     }
     visitInputAst(ast: ast.InputAst, context: any): any {
@@ -140,7 +172,11 @@ ${mutation}
                 }
             }
         }
-        return `${item.name}:${item.type.visit(this, context)}${item.required ? `!` : ``}`;
+        if (Array.isArray(item.type)) {
+            return `${item.name}:${item.type.map(ast => ast.visit(this, context)).join('| ')}${item.required ? `!` : ``}`;
+        } else {
+            return `${item.name}:${item.type.visit(this, context)}${item.required ? `!` : ``}`;
+        }
     }
     visitArrayAst(item: ast.ArrayAst, context: 'input' | 'output'): any {
         if (item.type instanceof ast.UseAst) {
