@@ -141,11 +141,13 @@ export class BooleanAst extends Ast {
         return visitor.visitBooleanAst(this, context);
     }
 }
+
 export class IdAst extends Ast {
     visit(visitor: AstVisitor, context: any) {
         return visitor.visitIdAst(this, context);
     }
 }
+
 export class ArrayAst extends Ast {
     required: boolean;
     type: AstType;
@@ -158,6 +160,7 @@ export class ArrayAst extends Ast {
         return visitor.visitArrayAst(this, context);
     }
 }
+
 export class ScalarAst extends Ast {
     name: string;
     constructor(name: string) {
@@ -168,6 +171,7 @@ export class ScalarAst extends Ast {
         return visitor.visitScalarAst(this, context);
     }
 }
+
 export class PropertyAst extends Ast {
     name: string;
     type: AstType;
@@ -182,10 +186,13 @@ export class PropertyAst extends Ast {
         return visitor.visitPropertyAst(this, context);
     }
 }
+
 export type AstType = ArrayAst | IdAst | BooleanAst | FloatAst | IntAst | StringAst | TypeAst | EnumAst;
+
 export function isTypeAst(val: any): val is TypeAst {
     return Array.isArray((val as TypeAst).properties)
 }
+
 export class UseAst extends Ast {
     name: string;
     type: 'enum' | 'type' | 'input';
