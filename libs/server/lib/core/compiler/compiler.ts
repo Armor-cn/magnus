@@ -260,7 +260,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                             return new ast.PropertyAst(
                                 column.propertyName,
                                 type,
-                                true
+                                false
                             )
                         }
                     })
@@ -575,7 +575,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                 item.parameters = [
                     new ast.ParameterAst(
                         0,
-                        `options`,
+                        `where`,
                         new ast.TypeAst(`${context.name}FindConditions`).visit(this, context),
                         true
                     ).visit(this, context)
@@ -737,7 +737,7 @@ function checkRelationRequired(column: RelationMetadata) {
 function checkRequired(column: ColumnMetadata) {
     let required = false;
     // 如果可以不是null
-    if (typeof column.default !== 'undefined' || column.isUpdateDate || column.isCreateDate || column.isGenerated) {
+    if (typeof column.default !== 'undefined' || column.isNullable || column.isUpdateDate || column.isCreateDate || column.isGenerated) {
         required = false;
     } else {
         required = true;

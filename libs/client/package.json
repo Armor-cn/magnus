@@ -1,11 +1,12 @@
 {
 	"name": "@notadd/magnus-client",
-	"version": "0.0.8",
+	"version": "0.0.32",
 	"description": "> TODO: description",
 	"author": "imeepos <1037483576@qq.com>",
 	"homepage": "https://github.com/notadd/magnus/tree/master/libs/client#readme",
 	"license": "ISC",
-	"main": "lib/client.js",
+	"main": "lib/index.js",
+	"typings": "lib/index.d.ts",
 	"directories": {
 		"lib": "lib",
 		"test": "__tests__"
@@ -21,19 +22,5 @@
 	"bugs": {
 		"url": "https://github.com/notadd/magnus/issues"
 	},
-	"dependencies": {
-		"@nestjs/common": "^6.2.4",
-		"@nestjs/core": "^6.2.4",
-		"@nestjs/graphql": "^6.2.1",
-		"@nestjs/platform-express": "^6.2.4",
-		"@types/lodash": "^4.14.132",
-		"apollo-server": "^2.5.0",
-		"apollo-server-express": "^2.5.0",
-		"fs-extra": "^8.0.1",
-		"graphql": "^14.3.1",
-		"graphql-tools": "^4.0.4",
-		"lodash": "^4.17.11",
-		"pg": "^7.11.0",
-		"typeorm": "^0.2.17"
-	}
+	"dependencies": {}
 }

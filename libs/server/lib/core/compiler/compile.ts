@@ -3,6 +3,7 @@ import { Connection, ObjectType } from 'typeorm';
 import { ParseVisitor } from './parse';
 import { DocumentNode } from 'graphql';
 import { gql } from 'apollo-server';
+
 export function compile(connection: Connection, entities: ObjectType<any>[]): DocumentNode[] {
     const metadatas = connection.entityMetadatas;
     const visitor = new ParseVisitor();
