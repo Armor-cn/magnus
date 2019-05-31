@@ -1,8 +1,7 @@
 import { Module, DynamicModule, Injectable, OnModuleInit, Inject } from "@nestjs/common";
-import { PresetConfig, gql } from "apollo-boost";
+import ApolloClient, { PresetConfig, gql } from "./client";
 export { gql }
 export { getConfig } from './config';
-import ApolloClient from 'apollo-boost/lib/index'
 export interface MagnusConfig {
     inputGolb: string;
     outputPath: string;
@@ -18,6 +17,7 @@ import { bootstrap } from './tools/index';
 export class MagnusClientModule implements OnModuleInit {
     constructor(@Inject(MAGNUS_CONFIG) private readonly config: MagnusConfig) { }
     static create(cfg: MagnusConfig): DynamicModule {
+        const client = new MagnusClient(cfg.apollo)
         return {
             module: MagnusClientModule,
             providers: [{
@@ -25,10 +25,12 @@ export class MagnusClientModule implements OnModuleInit {
                 useValue: cfg
             }, {
                 provide: MagnusClient,
-                useFactory: () => {
-                    return new MagnusClient(cfg.apollo)
-                }
-            }]
+                useValue: client
+            }],
+            exports: [
+                MAGNUS_CONFIG,
+                MagnusClient
+            ]
         }
     }
     async onModuleInit() {
