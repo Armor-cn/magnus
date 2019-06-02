@@ -9,3 +9,6 @@
 <p align="center">
     <img src="./docs/flow.svg">
 </p>
+
+
+[中文文档](https://magnus.notadd.com/)
