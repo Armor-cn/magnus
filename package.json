@@ -6,7 +6,8 @@
 	"scripts": {
 		"compiler": "./node_modules/.bin/tsc -p tsconfig.json",
 		"ts": "./node_modules/.bin/ts-node",
-		"clear": "sh ./clear.sh"
+		"clear": "sh ./clear.sh",
+		"commit": "git-cz"
 	},
 	"repository": {
 		"type": "git",

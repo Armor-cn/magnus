@@ -1,4 +1,4 @@
-import { Repository, FindManyOptions, FindOneOptions, ObjectID, EntityMetadata, DeleteResult, FindConditions, InsertResult, RemoveOptions, SaveOptions, Connection } from 'typeorm';
+import { Repository, FindManyOptions, FindOneOptions, EntityMetadata, DeleteResult, FindConditions, InsertResult, RemoveOptions, SaveOptions, Connection } from 'typeorm';
 export enum MutationType {
     CREATED = 'CREATED',
     UPDATED = 'UPDATED',
@@ -16,16 +16,10 @@ export interface SavesInput<T> {
     data: T[];
     options: SaveOptions;
 }
-
 export interface RemoveInput<T> {
     data: T;
     options?: RemoveOptions;
 }
-interface RemovesInput<T> {
-    data: T[];
-    options?: RemoveOptions;
-}
-
 export interface IUpdateResult {
     code: number;
     message: string;
@@ -48,10 +42,6 @@ interface FindAndCountResultInput<T> {
 interface FindByIdsType<T> {
     ids: any[];
     options?: FindManyOptions<T>
-}
-interface FindOneType<T> {
-    id?: string | number | Date | ObjectID;
-    options?: FindOneOptions<T>
 }
 interface WatchInput {
     mutation_in: MutationType[];
@@ -79,18 +69,18 @@ export class Resolver<T> {
                     return this.count(args[0].options)
                 }
             },
-            find: (...args: Args<{ options?: FindConditions<T> }>) => {
+            find: (...args: Args<{ options?: FindManyOptions<T> }>) => {
                 if (isArgsMethod(args)) {
                     return this.find(args[1].options);
                 } else if (isArgsProperty(args)) {
                     return this.find(args[0].options);
                 }
             },
-            findAndCount: (...args: Args<{ conditions?: FindConditions<T> }>) => {
+            findAndCount: (...args: Args<{ options?: FindManyOptions<T> }>) => {
                 if (isArgsMethod(args)) {
-                    return this.findAndCount(args[1].conditions)
+                    return this.findAndCount(args[1].options)
                 } else {
-                    return this.findAndCount(args[0].conditions)
+                    return this.findAndCount(args[0].options)
                 }
             },
             findByIds: (...args: Args<{ options: FindByIdsType<T> }>) => {
@@ -257,7 +247,7 @@ export class Resolver<T> {
         const data = await this.repository.find(options);
         return { data }
     }
-    async find(options?: FindConditions<T>): Promise<MultiResult<T>> {
+    async find(options?: FindManyOptions<T>): Promise<MultiResult<T>> {
         const relations: string[] = []
         this.meta.relations.map(relation => {
             const propertyName = relation.propertyName;
@@ -275,7 +265,7 @@ export class Resolver<T> {
         const data = await this.repository.findAndCount({ ...options, relations });
         return { data: data[0], count: data[1] }
     }
-    async findAndCount(conditions?: FindConditions<T>): Promise<FindAndCountResultInput<T>> {
+    async findAndCount(conditions?: FindManyOptions<T>): Promise<FindAndCountResultInput<T>> {
         const relations: string[] = []
         this.meta.relations.map(relation => {
             const propertyName = relation.propertyName;
