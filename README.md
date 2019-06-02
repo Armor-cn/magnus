@@ -6,6 +6,14 @@
 
 `dota` 半人猛犸，干掉`prisma`中的反人类设计
 
+
+## 功能
+
+- 使用 Graphql 请求数据库
+- 根据装饰器自动生成 graphql、grpc（proto）、restful 接口
+- 使用 proto 加速序列化
+- 支持 typeorm 及其他适配器
+
 <p align="center">
     <img src="./docs/flow.svg">
 </p>
