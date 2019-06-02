@@ -543,7 +543,7 @@ export class CompilerVisitor implements ast.AstVisitor<EntityMetadata> {
                 item.parameters = [
                     new ast.ParameterAst(
                         0,
-                        `options`,
+                        `entity`,
                         new ast.TypeAst(`${context.name}Input`).visit(this, context),
                         true
                     ).visit(this, context)
