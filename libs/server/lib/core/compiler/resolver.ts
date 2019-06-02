@@ -69,18 +69,18 @@ export class Resolver<T> {
                     return this.count(args[0].options)
                 }
             },
-            find: (...args: Args<{ options?: FindConditions<T> }>) => {
+            find: (...args: Args<{ options?: FindManyOptions<T> }>) => {
                 if (isArgsMethod(args)) {
                     return this.find(args[1].options);
                 } else if (isArgsProperty(args)) {
                     return this.find(args[0].options);
                 }
             },
-            findAndCount: (...args: Args<{ conditions?: FindConditions<T> }>) => {
+            findAndCount: (...args: Args<{ options?: FindManyOptions<T> }>) => {
                 if (isArgsMethod(args)) {
-                    return this.findAndCount(args[1].conditions)
+                    return this.findAndCount(args[1].options)
                 } else {
-                    return this.findAndCount(args[0].conditions)
+                    return this.findAndCount(args[0].options)
                 }
             },
             findByIds: (...args: Args<{ options: FindByIdsType<T> }>) => {
